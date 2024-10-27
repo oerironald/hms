@@ -18,3 +18,4 @@ matplotlib
 pandas
 plotly
 django-jazzmin
+shortuuid
