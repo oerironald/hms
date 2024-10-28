@@ -1,0 +1,15 @@
+
+
+<h1>Login</h1>
+<form method="POST" action="{% url 'hotel:hotel_list' %}">
+    {% csrf_token %}
+    <input type="email" name="email" placeholder="Email" required>
+    <input type="password" name="password" placeholder="Password" required>
+    <button type="submit">Log In</button>
+</form>
+
+{% if messages %}
+    {% for message in messages %}
+        <div>{{ message }}</div>
+    {% endfor %}
+{% endif %}

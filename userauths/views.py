@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from userauths.models import User, Profile
 from userauths.forms import UserRegisterForm
@@ -47,3 +47,34 @@ def register_view(request):
         'form': form
     }
     return render(request, 'userauths/sign-up.html', context)
+
+
+def login_view(request):
+    if request.user.is_authenticated:
+        messages.warning(request, "You are already logged in.")
+        return redirect("hotel:hotel_list")
+
+    if request.method == "POST":
+        email = request.POST.get("email")
+        password = request.POST.get("password")
+        
+        # Authenticate the user
+        user_auth = authenticate(request, email=email, password=password)
+        
+        if user_auth is not None:
+            login(request, user_auth)
+            messages.success(request, "You are logged in.")
+            next_url = request.GET.get("next", "hotel:hotel_list")
+            return redirect(next_url)
+        else:
+            messages.error(request, "Invalid email or password.")
+            return redirect("userauths:sign-in")
+    
+    return render(request, 'userauths/sign-in.html')  # Adjust the template path as needed
+
+
+
+def LogoutView(request):
+    logout(request)
+    messages.success(request, "you have been logged out")
+    return redirect("userauths:sign-in")

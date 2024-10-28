@@ -35,8 +35,8 @@ urlpatterns = [
     path('pos/', include('pos.urls')),
     path('', include('dashboard.urls')),
     path('bank/', include('bank.urls')),
-    path('hotel/', include('hotel.urls')),
     path('user/', include('userauths.urls')),
+    path('hotel/', include('hotel.urls')),
     
     
      

@@ -1,3 +1,5 @@
+
+{% extends 'userauths/base.html' %}
 <h1>Register</h1>
 <form method="POST" action="{% url 'userauths:sign-up' %}">
     {% csrf_token %}

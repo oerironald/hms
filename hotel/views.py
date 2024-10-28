@@ -1,17 +1,11 @@
-from django.shortcuts import render, redirect
-from .models import Hotel, Room, Booking
-from .forms import HotelForm, RoomForm, BookingForm
+from django.shortcuts import render
+from hotel.models import Hotel, Booking,ActivityLog, StaffOnDuty, Room, RoomType
 
-def hotel_list(request):
-    hotels = Hotel.objects.all()
-    return render(request, 'hotel/hotel_list.html', {'hotels': hotels})
 
-def create_hotel(request):
-    if request.method == 'POST':
-        form = HotelForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('hotel:hotel_list')
-    else:
-        form = HotelForm()
-    return render(request, 'hotel/hotel_form.html', {'form': form})
+def index(request):
+    hotels = Hotel.objects.filter(status="Live")  # Fetch live hotels
+    print(hotels)  # For debugging: Check what hotels are fetched
+    context = {
+        "hotels": hotels  # Pass the hotels context to the template
+    }
+    return render(request, "hotel/hotel_list.html", context)  # Ensure context is passed

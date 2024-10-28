@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Site Title</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        header {
+            background: #333;
+            color: #fff;
+            padding: 10px 0;
+            text-align: center;
+        }
+        .container {
+            width: 80%;
+            margin: auto;
+            overflow: hidden;
+        }
+        footer {
+            text-align: center;
+            padding: 10px 0;
+            background: #333;
+            color: #fff;
+            position: relative;
+            bottom: 0;
+            width: 100%;
+        }
+        nav a {
+            color: white;
+            margin: 0 10px;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Welcome to Your Site</h1>
+    <nav>
+        {% if user.is_authenticated %}
+            <span>Hello, {{ user.username }}!</span>
+            
+            <a href="{% url 'userauths:logout' %}">Sign Out</a>
+        {% else %}
+            <a href="{% url 'userauths:sign-up' %}">Sign Up</a>
+            <a href="{% url 'userauths:sign-in' %}">Sign In</a>
+        {% endif %}
+    </nav>
+</header>
+
+<div class="container">
+    {% block content %}
+    {% endblock %}
+</div>
+
+<footer>
+    <p>&copy; 2024 Your Site</p>
+</footer>
+
+<!-- SweetAlert -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.js"></script>
+<script>
+    // Display SweetAlert messages
+    {% if messages %}
+        {% for message in messages %}
+            swal({
+                title: "Notification",
+                text: "{{ message }}",
+                icon: "info",
+                button: "OK",
+            });
+        {% endfor %}
+    {% endif %}
+</script>
+
+</body>
+</html>

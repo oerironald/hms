@@ -1,11 +1,21 @@
-{% extends 'hotel/base.html' %}
-
-{% block content %}
-<h1>Hotel List</h1>
-<ul>
+<div class="row">
     {% for hotel in hotels %}
-        <li>{{ hotel.name }} - {{ hotel.location }}</li>
+        <div class="col-md-4 hotel-card">
+            <div class="card">
+                <img src="{{ hotel.image.url }}" alt="{{ hotel.name }}" class="card-img-top hotel-image">
+                <div class="card-body">
+                    <h5 class="card-title">{{ hotel.name }}</h5>
+                    <p class="card-text">{{ hotel.description|truncatewords:20 }}</p>
+                    <p class="card-text"><strong>Address:</strong> {{ hotel.address }}</p>
+                    <p class="card-text"><strong>Contact:</strong> {{ hotel.mobile }}</p>
+                    <p class="card-text"><strong>Status:</strong> {{ hotel.status }}</p>
+                    
+                </div>
+            </div>
+        </div>
+    {% empty %}
+        <div class="col-12">
+            <p>No hotels available at the moment.</p>
+        </div>
     {% endfor %}
-</ul>
-<a href="{% url 'hotel:create_hotel' %}">Add Hotel</a>
-{% endblock %}
+</div>
