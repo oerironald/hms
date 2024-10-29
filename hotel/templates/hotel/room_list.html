@@ -1,0 +1,17 @@
+{% extends "hotel/base.html" %}
+
+{% block title %}Available Hotels{% endblock %}
+
+{% block content %}
+<h1>Available Hotels</h1>
+<ul>
+    {% for hotel in hotels %}
+        <li>
+            <a href="{% url 'hotel_detail' hotel.slug %}">{{ hotel.name }}</a> -
+            {{ hotel.description|truncatewords:20 }}  <!-- Short description -->
+            <br>
+            <a href="{% url 'room_list' hotel.slug %}">View Rooms</a>
+        </li>
+    {% endfor %}
+</ul>
+{% endblock %}

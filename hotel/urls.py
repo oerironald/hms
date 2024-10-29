@@ -8,9 +8,12 @@ app_name = 'hotel'
 
 urlpatterns = [
     path('', views.index, name='index'),
-    path('detail/<slug:slug>/', views.hotel_detail, name='hotel_detail'),
-    path('detail/<slug:slug>/room-type/<slug:rt_slug>', views.room_type_detail, name='room_type_detail'),
-    
+    path('hotels/<slug:slug>/', views.hotel_detail, name='hotel_detail'),  # Hotel detail page
+    path('hotels/<slug:slug>/room-types/<slug:rt_slug>/', views.room_type_detail, name='room_type_detail'),
+    # Room type detail page
+    path('rooms/', views.room_list, name='room_list'),  # List of rooms
+    path('booking/<int:room_id>/', views.BookingView.as_view(), name='booking'),  # Booking page
+    # Add more paths as needed
    
 ]
 

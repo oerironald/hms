@@ -44,3 +44,40 @@ def room_type_detail(request, slug, rt_slug):
     }
     
     return render(request, "hotel/room_type_detail.html", context)
+
+
+from django.shortcuts import redirect
+from django.views import View
+from django.utils import timezone
+
+def room_list(request):
+    rooms = Room.objects.filter(is_available=True)
+    context = {
+        "rooms": rooms,
+    }
+    return render(request, "hotel/room_list.html", context)
+
+
+class BookingView(View):
+    def get(self, request, room_id):
+        room = get_object_or_404(Room, id=room_id)
+        context = {
+            "room": room,
+        }
+        return render(request, "hotel/booking_form.html", context)
+
+    def post(self, request, room_id):
+        room = get_object_or_404(Room, id=room_id)
+        booking = Booking(
+            user=request.user,
+            hotel=room.hotel,
+            room_type=room.room_type,
+            check_in_date=request.POST.get('check_in_date'),
+            check_out_date=request.POST.get('check_out_date'),
+            total=room.price(),  # Simplified for example
+            is_active=True,
+            date=timezone.now()
+        )
+        booking.save()
+        # Redirect to a success page or detail view
+        return redirect('hotel:booking_success', booking_id=booking.booking_id)
