@@ -25,15 +25,15 @@ OPEN_WEATHER_API_KEY = os.getenv('OPEN_WEATHER_API_KEY')
 SECRET_KEY = 'django-insecure-@)&dtdq_y9)j@v*txgj#8%6r)^g+ae1fr=(5bk=iu_vmvw6@r6'
 
 # SECURITY WARNINGcanada/static: don't run with debug turned on in production!
-DEBUG = True 
+DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
 CSRF_TRUSTED_ORIGINS = [
     'https://localhost:8000',
     'http://localhost:8000',
-    'https://hms-1-79i5.onrender.com',
-    'http://hms-1-79i5.onrender.com',
+    'https://ronyjogoo.onrender.com',
+    'http://ronyjogoo.onrender.com',
 
 ]
 
