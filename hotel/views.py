@@ -22,3 +22,25 @@ def hotel_detail(request, slug):
         "hotel": hotel  # Pass the hotel object to the template
     }
     return render(request, "hotel/hotel_detail.html", context)  # Render the detail template
+
+
+from django.shortcuts import get_object_or_404
+
+def room_type_detail(request, slug, rt_slug):
+    # Fetch the hotel based on the slug
+    hotel = get_object_or_404(Hotel, status="Live", slug=slug)
+    
+    # Fetch the room type based on the hotel and room type slug
+    room_type = get_object_or_404(RoomType, hotel=hotel, slug=rt_slug)
+    
+    # Get available rooms for this room type
+    rooms = Room.objects.filter(room_type=room_type, is_available=True)
+    
+    # Prepare context for rendering the template
+    context = {
+        "hotel": hotel,
+        "room_type": room_type,
+        "rooms": rooms,
+    }
+    
+    return render(request, "hotel/room_type_detail.html", context)
