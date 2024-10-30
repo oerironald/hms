@@ -25,7 +25,7 @@ OPEN_WEATHER_API_KEY = os.getenv('OPEN_WEATHER_API_KEY')
 SECRET_KEY = 'django-insecure-@)&dtdq_y9)j@v*txgj#8%6r)^g+ae1fr=(5bk=iu_vmvw6@r6'
 
 # SECURITY WARNINGcanada/static: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
@@ -172,8 +172,8 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
 ]
 
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 OPENMRS_USERNAME = 'admin'
 OPENMRS_PASSWORD = 'Admin1234'
