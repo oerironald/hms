@@ -1,0 +1,368 @@
+/* dashboard.css */
+
+body, html {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    height: 100%;
+    overflow: hidden;
+}
+
+.dashboard-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #03105a;
+    color: white;
+    padding: 10px 20px;
+    position: fixed;
+    width: 100%;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+}
+
+.navbar-left, .navbar-right {
+    display: flex;
+    align-items: center;
+}
+
+.sidebar-toggle, .mobile-menu-toggle {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5em;
+    cursor: pointer;
+    display: none;
+}
+
+.navbar-brand {
+    font-size: 1.2em;
+    font-weight: bold;
+    margin-left: 10px;
+}
+
+.contact-info, .navbar-item {
+    margin-left: 20px;
+}
+
+.navbar-item {
+    color: white;
+    text-decoration: none;
+}
+
+.sidebar {
+    width: 250px;
+    background-color: #333;
+    color: white;
+    position: fixed;
+    top: 50px;
+    left: 0;
+    height: calc(100vh - 50px);
+    overflow-y: auto;
+    transition: transform 0.3s ease;
+}
+
+.sidebar.hide {
+    transform: translateX(-100%);
+}
+
+.sidebar-menu {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar-menu > li {
+    border-bottom: 1px solid #444;
+}
+
+.sidebar-menu li a {
+    display: flex;
+    align-items: center;
+    padding: 15px 20px;
+    color: white;
+    text-decoration: none;
+}
+
+.sidebar-menu li a:hover {
+    background-color: #575757;
+}
+
+.sidebar-menu li a i {
+    margin-right: 10px;
+}
+
+.sidebar-menu .dropdown-menu {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out, opacity 0.3s ease-out;
+    opacity: 0;
+    background-color: #2c2c2c;
+}
+
+.sidebar-menu .dropdown.open .dropdown-menu {
+    max-height: 500px;
+    opacity: 1;
+    transition: max-height 0.5s ease-in, opacity 0.5s ease-in;
+}
+
+.sidebar-menu .dropdown-menu li {
+    border-bottom: none;
+}
+
+.sidebar-menu .dropdown-menu li a {
+    padding-left: 40px;
+}
+
+.sidebar-menu .dropdown > a {
+    position: relative;
+}
+
+.sidebar-menu .dropdown > a .fa-chevron-down {
+    position: absolute;
+    right: 20px;
+    transition: transform 0.3s ease;
+}
+
+.sidebar-menu .dropdown.open > a .fa-chevron-down {
+    transform: rotate(180deg);
+}
+
+.main-content {
+    display: flex;
+    flex-grow: 1;
+    margin-top: 50px;
+    margin-left: 250px;
+    overflow: auto;
+}
+
+.main-content.responsive {
+    margin-left: 0;
+}
+
+.content {
+    flex-grow: 1;
+    padding: 20px;
+    background-color: #f0f0f0;
+}
+
+.footer {
+    text-align: center;
+    padding: 10px;
+    background-color: #4CAF50;
+    color: white;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+}
+
+@media (max-width: 768px) {
+    .sidebar {
+        transform: matrix();
+    }
+
+    .sidebar.show {
+        transform: translateX(0);
+    }
+
+    .sidebar-toggle {
+        display: block;
+    }
+
+    .main-content {
+        margin-left: 0;
+    }
+
+    .navbar-right {
+        display: none;
+        flex-direction: column;
+        position: absolute;
+        top: 50px;
+        right: 0;
+        background-color: #03105a;
+        width: 200px;
+        padding: 20px;
+    }
+
+    .navbar-right.show {
+        display: flex;
+    }
+
+    .contact-info, .navbar-item {
+        margin: 10px 0;
+    }
+
+    .mobile-menu-toggle {
+        display: block;
+    }
+}
+
+@media (max-width: 480px) {
+    .navbar-brand {
+        font-size: 1em;
+    }
+
+    .contact-info i {
+        margin-right: 5px;
+    }
+
+    .contact-info span {
+        display: none;
+    }
+}
+
+/* Add this to your existing dashboard.css */
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #03105a;
+    color: white;
+    padding: 10px 20px;
+    position: fixed;
+    width: 100%;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+}
+
+.navbar-left, .navbar-right {
+    display: flex;
+    align-items: center;
+}
+
+.navbar-item {
+    color: white;
+    text-decoration: none;
+    margin-left: 20px;
+    display: flex;
+    align-items: center;
+}
+
+.navbar-item i {
+    margin-right: 5px;
+}
+
+@media (max-width: 768px) {
+    .navbar-brand {
+        font-size: 1.1em;
+    }
+
+    .navbar-item {
+        font-size: 0.9em;
+        margin-left: 15px;
+    }
+
+    .navbar-item span {
+        display: none;
+    }
+
+    .navbar-item:hover span {
+        display: inline;
+        position: absolute;
+        background-color: #03105a;
+        padding: 5px;
+        border-radius: 3px;
+        top: 40px;
+    }
+}
+
+@media (max-width: 480px) {
+    .navbar-brand {
+        font-size: 1em;
+    }
+
+    .navbar-item {
+        font-size: 0.8em;
+        margin-left: 10px;
+    }
+
+    .sidebar-toggle {
+        font-size: 1.2em;
+    }
+}
+
+/* Add this to your existing dashboard.css */
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #03105a;
+    color: white;
+    padding: 10px 20px;
+    position: fixed;
+    width: 100%;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+}
+
+.navbar-left, .navbar-right {
+    display: flex;
+    align-items: center;
+}
+
+.navbar-item {
+    color: white;
+    text-decoration: none;
+    margin-left: 20px;
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+
+.navbar-item i {
+    margin-right: 5px;
+}
+
+.tooltip {
+    position: absolute;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 0.8em;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+}
+
+@media (max-width: 768px) {
+    .navbar-brand {
+        font-size: 1.1em;
+    }
+
+    .navbar-item {
+        font-size: 0.9em;
+        margin-left: 15px;
+    }
+
+    .navbar-item span {
+        display: none;
+    }
+}
+
+@media (max-width: 480px) {
+    .navbar-brand {
+        font-size: 1em;
+    }
+
+    .navbar-item {
+        font-size: 0.8em;
+        margin-left: 10px;
+    }
+
+    .sidebar-toggle {
+        font-size: 1.2em;
+    }
+}
