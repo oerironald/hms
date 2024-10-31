@@ -1,9 +1,10 @@
+<!--hotel/templates/hotel/hotel_list.html-->
 <div class="row">
     {% for hotel in hotels %}
         <div class="col-md-4 hotel-card">
             <a href="{% url 'hotel:hotel_detail' hotel.slug  %}">detail</a>
             <div class="card">
-                <img src="{{ hotel.image.url }}" alt="{{ hotel.name }}" class="card-img-top hotel-image">
+                <!--<img src="{{ hotel.image.url }}" alt="{{ hotel.name }}" class="card-img-top hotel-image"> -->
                 <div class="card-body">
                     <h5 class="card-title">{{ hotel.name }}</h5>
                     <p class="card-text">{{ hotel.description|truncatewords:20 }}</p>

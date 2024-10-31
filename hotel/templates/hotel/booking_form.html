@@ -3,151 +3,159 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Booking Page</title>
-    <!-- Include your CSS files here -->
+    <title>Booking for {{ room.room_type.type }} at {{ room.hotel.name }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+        h1, h2 {
+            color: #007bff; /* Primary color */
+        }
+        .error {
+            color: red;
+        }
+        .room-list {
+            margin: 20px 0;
+        }
+        .room-item {
+            border: 1px solid #ccc;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        a {
+            display: inline-block;
+            margin-top: 10px;
+            color: #007bff;
+            text-decoration: none;
+        }
+        button {
+            margin-top: 20px;
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
 </head>
 <body>
 
-    <form method="post" id="mainBookingForm">
-        {% csrf_token %}
+<h1>Booking for {{ room.room_type.type }} at {{ room.hotel.name }}</h1>
 
-        <h2>{{ room.room_type.type }} - [{{ room.hotel.name }}]</h2>
-        <p>Room Number: {{ room.room_number }}</p>
-        <p>Number of Beds: {{ room.room_type.number_of_beds }}</p>
-        <p>Room Capacity: {{ room.room_type.room_capacity }}</p>
-        <p>Price: {{ room.room_type.price }}</p>
+{% if error %}
+    <p class="error">{{ error }}</p>
+{% endif %}
 
-        <div class="form-group">
-            <label for="check_in_date">Check-in Date:</label>
-            <input type="date" id="check_in_date" name="check_in_date" required>
-        </div>
-        <div class="form-group">
-            <label for="check_out_date">Check-out Date:</label>
-            <input type="date" id="check_out_date" name="check_out_date" required>
-        </div>
-        <div class="form-group">
-            <label for="num_adults">Number of Adults:</label>
-            <input type="number" id="num_adults" name="num_adults" min="1" value="1" required>
-        </div>
-        <div class="form-group">
-            <label for="num_children">Number of Children:</label>
-            <input type="number" id="num_children" name="num_children" min="0" value="0" required>
-        </div>
+<h2>Available Rooms</h2>
 
-        <div id="capacity-warning" style="color: red; display: none;"></div> <!-- Warning message -->
-
-        <input type="hidden" name="room_type" value="{{ room.room_type.id }}">
-
-        <button type="submit" id="confirm-booking-btn" class="btn btn-primary" disabled>Confirm Main Booking</button>
-    </form>
-
-    <!-- Tabs for Other Available Rooms -->
-    <h3>Other Available Rooms in hotel {{ room.hotel.name }}</h3>
-    <ul class="nav nav-tabs" role="tablist">
-        {% for available_room in available_rooms %}
-            <li class="nav-item">
-                <a class="nav-link" data-toggle="tab" href="#room{{ available_room.id }}">{{ available_room.room_type.type }}</a>
-            </li>
-        {% endfor %}
-    </ul>
-
-    <div class="tab-content">
-        {% for available_room in available_rooms %}
-            <div id="room{{ available_room.id }}" class="tab-pane fade">
-                <h4>{{ available_room.room_type.type }}</h4>
-                <p>Room Number: {{ available_room.room_number }}</p>
-                <p>Price: {{ available_room.price }}</p>
-                <p>Number of Beds: {{ available_room.room_type.number_of_beds }}</p>
-                <p>Room Capacity: {{ available_room.room_type.room_capacity }}</p>
-                <form method="post" action="{% url 'hotel:booking' available_room.id %}">
-                    {% csrf_token %}
-                    <input type="hidden" name="room_id" value="{{ available_room.id }}">
-                    <input type="hidden" name="room_type" value="{{ available_room.room_type.id }}">
-                    <input type="hidden" name="check_in_date" value="{{ request.POST.check_in_date }}">
-                    <input type="hidden" name="check_out_date" value="{{ request.POST.check_out_date }}">
-                    <input type="hidden" name="num_adults" value="{{ request.POST.num_adults }}">
-                    <input type="hidden" name="num_children" value="{{ request.POST.num_children }}">
-                    <button type="submit" class="btn btn-secondary">Book This Room</button>
-                </form>
+{% if rooms_with_availability %}
+    <div class="room-list">
+        {% for room_info in rooms_with_availability %}
+            <div class="room-item">
+                <h3>{{ room_info.room.room_number }} - ${{ room_info.room.price }} per night</h3>
+                {% if room_info.is_available %}
+                    <p style="color: green;">Status: Available for booking</p>
+                    {% if forloop.first %}
+                        <script>
+                            var roomAvailable = true; // Room is available
+                        </script>
+                    {% endif %}
+                {% else %}
+                    <p style="color: red;">Status: Occupied</p>
+                    {% if forloop.first %}
+                        <script>
+                            var roomAvailable = false; // Room is not available
+                        </script>
+                    {% endif %}
+                {% endif %}
             </div>
         {% endfor %}
     </div>
-
-    <!-- JavaScript for validation -->
+{% else %}
+    <p>No available rooms of this type at the moment.</p>
     <script>
-        function resetDateInputs() {
-            document.getElementById('check_in_date').value = '';
-            document.getElementById('check_out_date').value = '';
-        }
+        var roomAvailable = false; // No rooms available
+    </script>
+{% endif %}
 
-        function validateCapacity(roomCapacity) {
-            const numAdults = parseInt(document.getElementById('num_adults').value) || 0;
-            const numChildren = parseInt(document.getElementById('num_children').value) || 0;
+<h2>Booking Details</h2>
+<div id="booking-details" style="display: {% if rooms_with_availability|length > 0 and rooms_with_availability.0.is_available %}block{% else %}none{% endif %};">
+    <form method="post" action="{% url 'hotel:booking' room.id %}" id="booking-form">
+        {% csrf_token %}
+        <div id="booking-forms">
+            <div class="booking-form">
+                <label for="check_in_date_0">Check-in Date and Time:</label>
+                <input type="datetime-local" name="check_in_date_0" id="check_in_date_0" required>
+
+                <label for="check_out_date_0">Check-out Date and Time:</label>
+                <input type="datetime-local" name="check_out_date_0" id="check_out_date_0" required>
+
+                <label for="num_adults_0">Number of Adults:</label>
+                <input type="number" name="num_adults_0" id="num_adults_0" min="1" value="1" required>
+
+                <label for="num_children_0">Number of Children:</label>
+                <input type="number" name="num_children_0" id="num_children_0" min="0" value="0">
+            </div>
+        </div>
+        <button type="submit" id="book-now-button">Book Now</button>
+    </form>
+</div>
+
+<a href="{% url 'hotel:hotel_detail' room.hotel.slug %}">Back to Hotel Details</a>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const checkInInput = document.getElementById('check_in_date_0');
+        const checkOutInput = document.getElementById('check_out_date_0');
+        const numAdultsInput = document.getElementById('num_adults_0');
+        const numChildrenInput = document.getElementById('num_children_0');
+        const roomCapacity = {{ room.room_type.room_capacity }};
+
+        // Set minimum check-in date to today
+        checkInInput.min = new Date().toISOString().slice(0, 16);
+
+        // Function to validate dates and room capacity
+        function validateBooking() {
+            const checkInDate = new Date(checkInInput.value);
+            const checkOutDate = new Date(checkOutInput.value);
+            const numAdults = parseInt(numAdultsInput.value, 10);
+            const numChildren = parseInt(numChildrenInput.value, 10);
             const totalGuests = numAdults + numChildren;
 
-            const warningMessage = document.getElementById('capacity-warning');
-            const submitButton = document.getElementById('confirm-booking-btn');
-
-            // Clear previous warnings
-            warningMessage.textContent = '';
-
-            let isValid = true; // Assume valid until proven otherwise
-
-            if (numAdults <= 0) {
-                warningMessage.textContent = 'Error: Number of adults must be greater than zero.';
-                warningMessage.style.display = 'block';
-                isValid = false; // Mark as invalid
-            } else if (totalGuests > roomCapacity) {
-                warningMessage.textContent = `Error: Total guests (${totalGuests}) exceeds room capacity (${roomCapacity}).`;
-                warningMessage.style.display = 'block';
-                isValid = false; // Mark as invalid
-            } else {
-                warningMessage.style.display = 'none';
+            // Check for valid check-in and check-out dates
+            if (checkInInput.value && checkOutInput.value) {
+                if (checkInDate >= checkOutDate) {
+                    alert("Check-out date must be after check-in date.");
+                    return false;
+                }
             }
 
-            // Enable or disable the submit button based on validity
-            submitButton.disabled = !isValid;
-        }
-
-        function validateDates() {
-            const checkInDate = new Date(document.getElementById('check_in_date').value);
-            const checkOutDate = new Date(document.getElementById('check_out_date').value);
-            const today = new Date();
-            today.setHours(0, 0, 0); // Set time to midnight for comparison
-
-            const submitButton = document.getElementById('confirm-booking-btn');
-            let datesValid = true;
-
-            if (checkInDate < today) {
-                alert("Check-in date must not be in the past.");
-                resetDateInputs(); // Reset date inputs on error
-                datesValid = false; // Mark as invalid
-            } else if (checkOutDate <= checkInDate) {
-                alert("Check-out date must be after the check-in date.");
-                resetDateInputs(); // Reset date inputs on error
-                datesValid = false; // Mark as invalid
+            // Check for room capacity
+            if (totalGuests > roomCapacity) {
+                alert("Total number of guests exceeds room capacity.");
+                return false;
             }
 
-            // Enable or disable the submit button based on date validity
-            submitButton.disabled = !datesValid || submitButton.disabled;
+            return true;
         }
 
-        function validateInputs() {
-            const roomCapacity = {{ room.room_type.room_capacity }};
-            validateCapacity(roomCapacity);
-            validateDates();
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('num_adults').addEventListener('input', validateInputs);
-            document.getElementById('num_children').addEventListener('input', validateInputs);
-            document.getElementById('check_in_date').addEventListener('change', validateInputs);
-            document.getElementById('check_out_date').addEventListener('change', validateInputs);
-
-            // Initial validation to set the correct button state
-            validateInputs();
+        // Add event listener to validate form before submission
+        document.getElementById('booking-form').addEventListener('submit', function(event) {
+            if (!validateBooking()) {
+                event.preventDefault(); // Prevent form submission if validation fails
+            }
         });
-    </script>
+    });
+</script>
 
 </body>
 </html>

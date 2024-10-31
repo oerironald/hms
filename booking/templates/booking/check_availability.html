@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Check Room Availability</title>
+
+</head>
+<body>
+
+<h1>Check Room Availability</h1>
+
+<form method="post" action="{% url 'booking:check_room_availability' %}">
+    {% csrf_token %}
+
+    <div>
+        <label for="hotel-id">Hotel:</label>
+        <select name="hotel-id" id="hotel-id" required>
+            {% for hotel in hotels %}
+                <option value="{{ hotel.id }}">{{ hotel.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div>
+        <label for="checkin">Check-in Date:</label>
+        <input type="date" name="checkin" id="checkin" required>
+    </div>
+
+    <div>
+        <label for="checkout">Check-out Date:</label>
+        <input type="date" name="checkout" id="checkout" required>
+    </div>
+
+    <div>
+        <label for="adult">Adults:</label>
+        <input type="number" name="adult" id="adult" min="1" value="1" required>
+    </div>
+
+    <div>
+        <label for="children">Children:</label>
+        <input type="number" name="children" id="children" min="0" value="0">
+    </div>
+
+    <div>
+        <label for="room-type">Room Type:</label>
+        <select name="room-type" id="room-type" required>
+            {% for room_type in room_types %}
+                <option value="{{ room_type.slug }}">{{ room_type.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <button type="submit">Check Availability</button>
+</form>
+
+<a href="{% url 'hotel:index' %}">Back to Hotel List</a>
+
+</body>
+</html>

@@ -1,3 +1,4 @@
+<!--hotel/templates/hotel/booking_success.html-->
 {% extends "hotel/base.html" %}
 
 {% block content %}
@@ -8,5 +9,5 @@
 <p>Number of Adults: {{ booking.num_adults }}</p>
 <p>Number of Children: {{ booking.num_children }}</p>
 <p>Thank you for booking with us!</p>
-<a href="{% url 'hotel:room_list' %}">Back to Room List</a>
+<a href="{% url 'hotel:index' %}">Back to Hotel List</a>
 {% endblock %}

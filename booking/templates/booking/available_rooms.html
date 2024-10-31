@@ -1,0 +1,22 @@
+<h1>Available Rooms for {{ room_type.name }} at {{ hotel.name }}</h1>
+<p>Check-in: {{ checkin }}</p>
+<p>Check-out: {{ checkout }}</p>
+<p>Adults: {{ adult }}</p>
+<p>Children: {{ children }}</p>
+
+<!-- Rooms Section -->
+<h2>Available Rooms</h2>
+{% if available_rooms %}
+    <ul>
+        {% for room in available_rooms %}
+            <li>
+                <h3>{{ room.room_number }} - {{ room.room_type.type }}</h3>
+                <p>Price: {{ room.price }}</p>
+                <a href="{% url 'hotel:booking' room.id %}" class="btn btn-primary">Book Now</a>
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No rooms available for this room type.</p>
+{% endif %}
+<a href="{% url 'hotel:index' %}">Back to Hotel List</a>

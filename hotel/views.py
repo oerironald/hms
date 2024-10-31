@@ -1,3 +1,4 @@
+# hotel/views.py
 from django.shortcuts import render
 from hotel.models import Hotel, Booking,ActivityLog, StaffOnDuty, Room, RoomType
 from django.shortcuts import get_object_or_404
@@ -17,15 +18,21 @@ def index(request):
     return render(request, "hotel/hotel_list.html", context)  # Ensure context is passed
 
 
+# hotel/views.py
+
+
 
 
 def hotel_detail(request, slug):
     # Use get_object_or_404 to fetch a single hotel or return a 404 if not found
     hotel = get_object_or_404(Hotel, status="Live", slug=slug)
-    
-    print(hotel)  # For debugging: Check the fetched hotel object
+
+    # Fetch the rooms associated with the hotel
+    rooms = Room.objects.filter(hotel=hotel)  # Adjust the field based on your model
+
     context = {
-        "hotel": hotel  # Pass the hotel object to the template
+        "hotel": hotel,  # Pass the hotel object to the template
+        "rooms": rooms,  # Pass the rooms list to the template
     }
     return render(request, "hotel/hotel_detail.html", context)  # Render the detail template
 
@@ -72,67 +79,107 @@ class BookingView(View):
         room = get_object_or_404(Room, id=room_id)
         room_type = room.room_type
 
-        # Get other available rooms of the same room type
-        available_rooms = Room.objects.filter(room_type=room_type, is_available=True).exclude(id=room.id)
+        # Get all rooms of the same type
+        all_rooms = Room.objects.filter(room_type=room_type)
+
+        # Prepare to check availability for each room
+        rooms_with_availability = []
+        for room in all_rooms:
+            is_available = self.is_room_available(room)  # Check overall availability for each room
+            rooms_with_availability.append({
+                'room': room,
+                'is_available': is_available
+            })
 
         context = {
             "room": room,
-            "available_rooms": available_rooms,
+            "rooms_with_availability": rooms_with_availability,
         }
         return render(request, "hotel/booking_form.html", context)
 
     def post(self, request, room_id):
         room = get_object_or_404(Room, id=room_id)
-        check_in_date = request.POST.get('check_in_date')
-        check_out_date = request.POST.get('check_out_date')
-        num_adults = int(request.POST.get('num_adults', 0))  # Default to 0 if not provided
-        num_children = int(request.POST.get('num_children', 0))  # Default to 0 if not provided
-        total_guests = num_adults + num_children
+        bookings_data = []
+        index = 0
 
-        # Check room capacity
-        room_capacity = room.room_type.room_capacity
-        if total_guests > room_capacity:
-            return render(request, "hotel/booking_form.html", {
-                "room": room,
-                "error": f"Total guests ({total_guests}) exceed room capacity ({room_capacity})."
-            })
+        while True:
+            check_in_date = request.POST.get(f'check_in_date_{index}')
+            check_out_date = request.POST.get(f'check_out_date_{index}')
+            if not check_in_date and not check_out_date:
+                break  # Exit if no more forms
 
-        # Check room availability
-        if not self.is_room_available(room, check_in_date, check_out_date):
-            return render(request, "hotel/booking_form.html", {
-                "room": room,
-                "error": "Room is not available for the selected dates."
-            })
+            num_adults = int(request.POST.get(f'num_adults_{index}', 0))
+            num_children = int(request.POST.get(f'num_children_{index}', 0))
 
-        # Create the booking
-        booking = Booking(
-            user=request.user,
-            hotel=room.hotel,
-            room_type=room.room_type,
-            check_in_date=check_in_date,
-            check_out_date=check_out_date,
-            total=room.price(),  # Adjust total based on the number of guests if needed
-            num_adults=num_adults,
-            num_children=num_children,
-            is_active=True,
-            date=timezone.now()
-        )
-        booking.save()
+            # Skip if check-in or check-out date is missing
+            if not check_in_date or not check_out_date:
+                index += 1
+                continue
 
-        # Mark the room as unavailable
-        room.is_available = False
-        room.save()
+            # Parse the datetime strings
+            check_in = timezone.datetime.strptime(check_in_date, '%Y-%m-%dT%H:%M')
+            check_out = timezone.datetime.strptime(check_out_date, '%Y-%m-%dT%H:%M')
+            num_nights = (check_out - check_in).days
 
-        return redirect('hotel:booking_success', booking_id=booking.booking_id)
+            total_guests = num_adults + num_children
+            room_capacity = room.room_type.room_capacity
 
-    def is_room_available(self, room, check_in_date, check_out_date):
-        # Check if there are any bookings for this room in the given date range
-        conflicting_bookings = Booking.objects.filter(
-            room=room,
-            check_in_date__lt=check_out_date,
-            check_out_date__gt=check_in_date
-        )
-        return not conflicting_bookings.exists()
+            # Check room capacity
+            if total_guests > room_capacity:
+                return render(request, "hotel/booking_form.html", {
+                    "room": room,
+                    "error": f"Total guests ({total_guests}) exceed room capacity ({room_capacity})."
+                })
+
+            # Check room availability for the selected dates
+            if not self.is_room_available(room, check_in, check_out):
+                return render(request, "hotel/booking_form.html", {
+                    "room": room,
+                    "error": "Room is already booked for the selected dates."
+                })
+
+            # Calculate total cost based on price per night and number of nights
+            total_cost = room.price() * num_nights
+
+            # Create the booking
+            booking = Booking(
+                user=request.user,
+                hotel=room.hotel,
+                room_type=room.room_type,
+                check_in_date=check_in,
+                check_out_date=check_out,
+                total=total_cost,
+                num_adults=num_adults,
+                num_children=num_children,
+                is_active=True,
+                date=timezone.now()
+            )
+            booking.save()
+            bookings_data.append(booking)
+
+            # Mark the room as unavailable after booking
+            room.is_available = False  # Update availability
+            room.save()  # Save the room status
+
+            index += 1  # Move to the next index
+
+        # Redirect logic
+        if bookings_data:
+            return redirect('hotel:booking_success', booking_id=bookings_data[0].booking_id)  # Use booking_id
+        else:
+            return redirect('hotel:booking_failure')
+
+    def is_room_available(self, room, check_in_date=None, check_out_date=None):
+        if check_in_date and check_out_date:
+            conflicting_bookings = Booking.objects.filter(
+                room=room,
+                check_in_date__lt=check_out_date,
+                check_out_date__gt=check_in_date,
+                is_active=True
+            )
+            return not conflicting_bookings.exists()
+        else:
+            return room.is_available
 
 class CancelBookingView(View):
     def post(self, request, booking_id):
@@ -151,8 +198,9 @@ class CancelBookingView(View):
 
 class BookingSuccessView(View):
     def get(self, request, booking_id):
-        booking = get_object_or_404(Booking, booking_id=booking_id)
-        context = {
-            'booking': booking,  # Pass the entire booking object
-        }
-        return render(request, "hotel/booking_success.html", context)
+        booking = get_object_or_404(Booking, booking_id=booking_id)  # Change to booking_id
+        return render(request, 'hotel/booking_success.html', {'booking': booking})
+
+class BookingFailureView(View):
+    def get(self, request):
+        return render(request, 'hotel/booking_failure.html')

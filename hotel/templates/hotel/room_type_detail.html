@@ -1,9 +1,45 @@
-<!-- In room_type_detail.html -->
-<form action="{% url 'hotel:booking' room.id %}" method="post">
-    {% csrf_token %}
-    <input type="hidden" name="check_in_date" value="{{ checkin }}">
-    <input type="hidden" name="check_out_date" value="{{ checkout }}">
-    <input type="hidden" name="num_adults" value="{{ adult }}">
-    <input type="hidden" name="num_children" value="{{ children }}">
-    <button type="submit" class="btn btn-primary">Book Now</button>
-</form>
+<!--hotel/templates/hotel/room_type.html-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ room_type.name }} at {{ hotel.name }}</title>
+    <style>
+        .disabled-button {
+            color: gray;
+            cursor: not-allowed; /* Shows not-allowed cursor */
+            text-decoration: none; /* Removes underline */
+        }
+    </style>
+</head>
+<body>
+
+<h1>{{ room_type.name }} at {{ hotel.name }}</h1>
+
+<p>Available Rooms:</p>
+
+{% if rooms %}
+    <ul>
+        {% for room in rooms %}
+            <li>
+                <h3>{{ room.room_number }} - {{ room.price }} per night</h3>
+                {% if room.is_available %}
+                    <p style="color: green;">Status: Available for booking</p>
+                    <a href="{% url 'hotel:booking' room.id %}">Book Now</a>
+                {% else %}
+                    <p style="color: red;">Status: Occupied</p>
+                    <span class="disabled-button">Book Now (Unavailable)</span> <!-- Changed to span -->
+                {% endif %}
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No available rooms of this type at the moment.</p>
+{% endif %}
+
+<a href="{% url 'hotel:hotel_detail' hotel.slug %}">Back to Hotel Details</a>
+
+</body>
+</html>

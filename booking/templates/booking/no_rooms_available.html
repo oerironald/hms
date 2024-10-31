@@ -1,0 +1,7 @@
+<h1>No Rooms Available</h1>
+<p>Unfortunately, there are no available rooms for {{ room_type.name }} at {{ hotel.name }} for the selected dates.</p>
+<p>Check-in: {{ checkin }}</p>
+<p>Check-out: {{ checkout }}</p>
+<p>Adults: {{ adult }}</p>
+<p>Children: {{ children }}</p>
+<a href="{% url 'hotel:index' %}">Back to Hotel List</a>
