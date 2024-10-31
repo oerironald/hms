@@ -1,17 +1,21 @@
 {% extends "hotel/base.html" %}
 
-{% block title %}Available Hotels{% endblock %}
-
 {% block content %}
-<h1>Available Hotels</h1>
-<ul>
-    {% for hotel in hotels %}
-        <li>
-            <a href="{% url 'hotel_detail' hotel.slug %}">{{ hotel.name }}</a> -
-            {{ hotel.description|truncatewords:20 }}  <!-- Short description -->
-            <br>
-            <a href="{% url 'room_list' hotel.slug %}">View Rooms</a>
-        </li>
-    {% endfor %}
-</ul>
+<h1>Available Rooms</h1>
+
+{% if rooms %}
+    <ul>
+        {% for room in rooms %}
+            <li>
+                <h2>{{ room.room_type.type }} -[ {{ room.hotel.name }}]</h2>
+                <p>Room Number: {{ room.room_number }}</p>
+                <p>Price: {{ room.price }}</p>
+                <p>Status: {% if room.is_available %} Available {% else %} Not Available {% endif %}</p>
+                <a href="{% url 'hotel:booking' room.id %}" class="btn btn-primary">Book Now</a>
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No rooms available at the moment.</p>
+{% endif %}
 {% endblock %}

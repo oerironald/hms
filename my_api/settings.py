@@ -25,7 +25,7 @@ OPEN_WEATHER_API_KEY = os.getenv('OPEN_WEATHER_API_KEY')
 SECRET_KEY = 'django-insecure-@)&dtdq_y9)j@v*txgj#8%6r)^g+ae1fr=(5bk=iu_vmvw6@r6'
 
 # SECURITY WARNINGcanada/static: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
@@ -67,6 +67,7 @@ INSTALLED_APPS = [
     'bank',
     'hotel',
     'userauths',
+    'booking',
     
     
     
@@ -207,9 +208,9 @@ AUTH_USER_MODEL = 'userauths.User'
 
 JAZZMIN_SETTINGS = {
     'site_header': "The_One",
-    'site_brand': "Your #1 Store.",
+    'site_brand': "Techies.",
     'site_logo': "/images/logo.png",
-    'copyright':  "All Rights",
+    'copyright':  "Jogoo Ronald",
     "welcome_sign": "Welcome to The_One, Login Now.",
     "topmenu_links": [
 

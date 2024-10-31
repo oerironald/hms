@@ -1,0 +1,12 @@
+{% extends "hotel/base.html" %}
+
+{% block content %}
+<h1>Booking Successful!</h1>
+<p>Your booking ID is: {{ booking.booking_id }}</p>
+<p>Check-in Date: {{ booking.check_in_date }}</p>
+<p>Check-out Date: {{ booking.check_out_date }}</p>
+<p>Number of Adults: {{ booking.num_adults }}</p>
+<p>Number of Children: {{ booking.num_children }}</p>
+<p>Thank you for booking with us!</p>
+<a href="{% url 'hotel:room_list' %}">Back to Room List</a>
+{% endblock %}

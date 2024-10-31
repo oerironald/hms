@@ -1,0 +1,9 @@
+<!-- In room_type_detail.html -->
+<form action="{% url 'hotel:booking' room.id %}" method="post">
+    {% csrf_token %}
+    <input type="hidden" name="check_in_date" value="{{ checkin }}">
+    <input type="hidden" name="check_out_date" value="{{ checkout }}">
+    <input type="hidden" name="num_adults" value="{{ adult }}">
+    <input type="hidden" name="num_children" value="{{ children }}">
+    <button type="submit" class="btn btn-primary">Book Now</button>
+</form>
