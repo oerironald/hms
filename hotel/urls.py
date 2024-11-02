@@ -15,6 +15,8 @@ urlpatterns = [
     path('booking/cancel/<str:booking_id>/', views.CancelBookingView.as_view(), name='cancel_booking'),  # Cancel booking
     path('booking/success/<str:booking_id>/', views.BookingSuccessView.as_view(), name='booking_success'),
     path('booking/failure/', views.BookingFailureView.as_view(), name='booking_failure'),
+    path('room-availability/', views.check_availability, name='check_availability'),
+    # Other paths...
 ]
 
 if settings.DEBUG:

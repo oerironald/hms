@@ -5,6 +5,7 @@ from django.shortcuts import get_object_or_404
 from django.shortcuts import redirect
 from django.views import View
 from django.utils import timezone
+from datetime import datetime
 from django.core.exceptions import ValidationError
 
 
@@ -204,3 +205,33 @@ class BookingSuccessView(View):
 class BookingFailureView(View):
     def get(self, request):
         return render(request, 'hotel/booking_failure.html')
+
+def check_availability(request):
+    available_rooms = None
+    if request.method == "POST":
+        check_in_date_str = request.POST.get('check_in_date')
+        check_out_date_str = request.POST.get('check_out_date')
+        num_guests = int(request.POST.get('num_guests'))
+
+        # Convert to datetime using strptime
+        check_in_date = datetime.strptime(check_in_date_str, '%Y-%m-%dT%H:%M')
+        check_out_date = datetime.strptime(check_out_date_str, '%Y-%m-%dT%H:%M')
+
+        # Step 1: Query to find available rooms based on room type capacity
+        available_rooms = Room.objects.filter(
+            is_available=True,
+            room_type__room_capacity__gte=num_guests,  # Use the related field
+        ).distinct()  # Use distinct to avoid duplicates if a room is available
+
+        # Step 2: Check for existing bookings that overlap with the requested dates
+        existing_bookings = Booking.objects.filter(
+            check_in_date__lt=check_out_date,
+            check_out_date__gt=check_in_date,
+            room__hotel__in=[room.hotel for room in available_rooms]  # Limit to the hotels of available rooms
+        )
+
+        # Exclude rooms that are booked
+        booked_room_ids = existing_bookings.values_list('room', flat=True)
+        available_rooms = available_rooms.exclude(id__in=booked_room_ids)
+
+    return render(request, 'hotel/check_availability.html', {'available_rooms': available_rooms})

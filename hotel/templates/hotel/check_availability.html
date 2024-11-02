@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Check Room Availability</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+        h1, h2 {
+            color: #007bff;
+        }
+        form {
+            margin: 20px 0;
+            padding: 15px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+        input {
+            margin-bottom: 10px;
+            padding: 8px;
+            width: 100%;
+            max-width: 300px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .room-list {
+            margin-top: 20px;
+        }
+        .room-item {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Check Room Availability</h1>
+
+<form method="post" action="{% url 'hotel:check_availability' %}" name="availability_check_form">
+    {% csrf_token %}
+    <label for="check_in_date">Check-in Date:</label>
+    <input type="datetime-local" name="check_in_date" id="check_in_date" required>
+
+    <label for="check_out_date">Check-out Date:</label>
+    <input type="datetime-local" name="check_out_date" id="check_out_date" required>
+
+    <label for="num_guests">Number of Guests:</label>
+    <input type="number" name="num_guests" id="num_guests" min="1" value="1" required>
+
+    <button type="submit">Check Availability</button>
+</form>
+
+<div class="room-list">
+    {% if available_rooms %}
+        <h2>Available Rooms</h2>
+        {% for room in available_rooms %}
+            <div class="room-item">
+                <h3>{{ room.room_number }} - ${{ room.room_type.price }} per night</h3>
+                <p>Room Type: {{ room.room_type.type }}</p>
+                <p>Status: Available</p>
+            </div>
+        {% endfor %}
+    {% else %}
+        <h2>No Rooms Match Your Search</h2>
+        <p>Sorry, there are no available rooms for the selected dates and number of guests.</p>
+    {% endif %}
+</div>
+
+<a href="{% url 'hotel:index' %}">Back to Hotel List</a>
+
+</body>
+</html>
