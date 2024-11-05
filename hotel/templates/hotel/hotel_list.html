@@ -13,7 +13,9 @@
                         <p class="card-text" style="color: #F0E68C;"><strong>Address:</strong> {{ hotel.address }}</p> <!-- Khaki for address -->
                         <p class="card-text" style="color: #F0E68C;"><strong>Contact:</strong> {{ hotel.mobile }}</p> <!-- Khaki for contact -->
                         <p class="card-text" style="color: #F0E68C;"><strong>Status:</strong> {{ hotel.status }}</p> <!-- Khaki for status -->
-                        <a href="{% url 'hotel:hotel_detail' hotel.slug %}" class="btn btn-custom">View Details</a> <!-- Custom button class -->
+                        <div class="button-wrapper mt-3"> <!-- Wrapper for button with optional margin -->
+                            <a href="{% url 'hotel:hotel_detail' hotel.slug %}" class="btn btn-custom">View Details</a>
+                        </div> <!-- End of button wrapper -->
                     </div>
                 </div>
             </div>
@@ -54,6 +56,11 @@
     .btn-custom:hover {
         background-color: #C70039; /* Darker red on hover */
         transform: scale(1.05); /* Slightly scale up on hover */
+    }
+
+    /* Button Wrapper Styling */
+    .button-wrapper {
+        margin-bottom: 80px; /* Adjust this value to the height of your footer */
     }
 </style>
 {% endblock %}
