@@ -68,7 +68,7 @@ INSTALLED_APPS = [
     'hotel',
     'userauths',
     'booking',
-    'user_dashboard',
+
     
     
     
