@@ -1,28 +1,110 @@
-<!--hotel/templates/hotel/hotel_detail.html-->
-<h1>{{ hotel.name }}</h1>
-<a href="{% url 'hotel:index' %}">Back to List</a>
-<!-- Uncomment the image if you have a hotel image -->
-<!-- <img src="{{ hotel.image.url }}" alt="{{ hotel.name }}" class="hotel-image"> -->
-<p>{{ hotel.description }}</p>
-<p><strong>Address:</strong> {{ hotel.address }}</p>
-<p><strong>Contact:</strong> {{ hotel.mobile }}</p>
-<p><strong>Email:</strong> {{ hotel.email }}</p>
+{% extends 'hotel/base.html' %}
 
-<!-- Rooms Section -->
-<h2>Available Rooms</h2>
-{% if rooms %}
-    {% for room in rooms %}
-        <div class="room-detail">
-            <h3>{{ room.room_type.type }}</h3>
-            <p>Room Number: {{ room.room_number }}</p>
-            <p>Price: {{ room.room_type.price }}</p>
-            <p>Number of Beds: {{ room.room_type.number_of_beds }}</p>
-            <p>Capacity: {{ room.room_type.room_capacity }}</p>
-            <a href="{% url 'hotel:booking' room.id %}" class="btn btn-primary">Book Now</a>
-            <!-- Link to Room Type Detail -->
-            <a href="{% url 'hotel:room_type_detail' hotel.slug room.room_type.slug %}" class="btn btn-secondary">View Room Type Details</a>
+{% block content %}
+<h1 style="font-family: Arial, sans-serif; color: #333333;">{{ hotel.name }} Hotel</h1>
+
+<p style="font-family: 'Roboto', sans-serif; color: #666666;">Available Rooms:</p>
+
+<div class="room-list">
+    {% if rooms %}
+        <div class="row">
+            {% for room in rooms %}
+                <div class="col-md-4 mb-3 outer-card"> <!-- Added 'outer-card' class for custom styling -->
+                    <div class="room-item border p-3 rounded d-flex flex-column">
+                        <h3 style="font-family: 'Roboto', sans-serif; color: #1a73e8;">Room no: {{ room.room_number }}</h3>
+                        <p style="font-family: 'Roboto', sans-serif; color: #1a73e8;">Room Type: {{ room.room_type.type }}</p>
+                        <p style="color: #555555;">Price: Kshs.{{ room.price }} per night</p>
+                        <p style="color: #555555;">Capacity: {{ room.room_type.room_capacity }} Occupants</p>
+                        <p style="color: #555555;">No of Beds: {{ room.room_type.number_of_beds }} Beds</p>
+
+                        {% if room.is_available %}
+                            <p class="text-success" style="font-weight: bold;">Status: Available for booking</p>
+                            <a class="enabled-button btn btn-primary small-button mt-auto" href="{% url 'hotel:booking' room.id %}">Book Now</a>
+                        {% else %}
+                            <p class="text-danger" style="font-weight: bold;">Status: Occupied</p>
+                            <span class="disabled-button">Book Now (Unavailable)</span>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
         </div>
-    {% endfor %}
-{% else %}
-    <p>No rooms available for hotel "{{ hotel.name }}".</p>
-{% endif %}
+    {% else %}
+        <p style="font-family: 'Roboto', sans-serif; color: #888888;">No available rooms of this type at the moment.</p>
+    {% endif %}
+</div>
+
+<a href="{% url 'hotel:index' %}" class="btn btn-secondary">Back to Hotel List</a>
+
+<style>
+    /* Background color and padding for .outer-card div */
+    .outer-card {
+        background-color: #e3f2fd; /* Light blue background */
+        border: 1px solid #bbdefb; /* Soft blue border */
+        border-radius: 10px; /* Rounded corners */
+        padding: 10px; /* Adds space around the inner card */
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Light shadow for depth */
+    }
+
+    /* Button Styles */
+    .disabled-button {
+        color: gray;
+        cursor: not-allowed;
+        text-decoration: none;
+    }
+    .enabled-button {
+        color: white;
+        background-color: #1a73e8;
+        text-decoration: none;
+        padding: 5px 10px;
+        font-size: 13px;
+        width: 90px;
+        border-radius: 5px;
+        align-self: flex-start;
+        transition: background-color 0.3s;
+    }
+    .enabled-button:hover {
+        background-color: #1258b1;
+    }
+
+    /* Room List Container */
+    .room-list {
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+
+    /* Room Item Card */
+    .room-item {
+        background-color: #b3d9c2; /* Sea spray color */
+        color: #2f4f4f; /* Dark Slate Gray for text contrast */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        border: 1px solid #e0e0e0;
+        height: auto;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        transition: transform 0.2s, box-shadow 0.2s;
+        font-family: 'Roboto', sans-serif;
+    }
+    .room-item:hover {
+        transform: scale(1.05);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Typography */
+    h1 {
+        font-family: 'Roboto', sans-serif;
+        font-size: 24px;
+        color: #333333;
+    }
+    h3 {
+        font-family: 'Roboto', sans-serif;
+        font-size: 20px;
+        color: #1a73e8;
+    }
+    p {
+        font-family: 'Roboto', sans-serif;
+        font-size: 14px;
+        color: #555555;
+    }
+</style>
+{% endblock %}

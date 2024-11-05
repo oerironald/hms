@@ -1,5 +1,3 @@
-<!--hotel/templates/hotel/room_type.html-->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,6 +8,10 @@
         .disabled-button {
             color: gray;
             cursor: not-allowed; /* Shows not-allowed cursor */
+            text-decoration: none; /* Removes underline */
+        }
+        .enabled-button {
+            color: blue; /* Button color */
             text-decoration: none; /* Removes underline */
         }
     </style>
@@ -24,13 +26,14 @@
     <ul>
         {% for room in rooms %}
             <li>
+                <h3>{{ room.room_number }} - Kshs. {{ room.price }} per night</h3>
                 <h3>{{ room.room_number }} - {{ room.price }} per night</h3>
                 {% if room.is_available %}
                     <p style="color: green;">Status: Available for booking</p>
-                    <a href="{% url 'hotel:booking' room.id %}">Book Now</a>
+                    <a class="enabled-button" href="{% url 'hotel:booking' room.id %}">Book Now</a>
                 {% else %}
                     <p style="color: red;">Status: Occupied</p>
-                    <span class="disabled-button">Book Now (Unavailable)</span> <!-- Changed to span -->
+                    <span class="disabled-button">Book Now (Unavailable)</span>
                 {% endif %}
             </li>
         {% endfor %}

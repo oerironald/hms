@@ -1,23 +1,59 @@
-<!--hotel/templates/hotel/hotel_list.html-->
-<div class="row">
-    {% for hotel in hotels %}
-        <div class="col-md-4 hotel-card">
-            <a href="{% url 'hotel:hotel_detail' hotel.slug  %}">detail</a>
-            <div class="card">
-                <!--<img src="{{ hotel.image.url }}" alt="{{ hotel.name }}" class="card-img-top hotel-image"> -->
-                <div class="card-body">
-                    <h5 class="card-title">{{ hotel.name }}</h5>
-                    <p class="card-text">{{ hotel.description|truncatewords:20 }}</p>
-                    <p class="card-text"><strong>Address:</strong> {{ hotel.address }}</p>
-                    <p class="card-text"><strong>Contact:</strong> {{ hotel.mobile }}</p>
-                    <p class="card-text"><strong>Status:</strong> {{ hotel.status }}</p>
-                    
+{% extends 'hotel/base.html' %}
+
+{% block content %}
+<div class="container">
+    <h1 class="my-4">Available Hotels</h1>
+    <div class="row">
+        {% for hotel in hotels %}
+            <div class="col-md-4 mb-4 hotel-card">
+                <div class="card h-100" style="background-image: url('{{ hotel.image.url }}'); background-size: cover; background-position: center; border: none; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);">
+                    <div class="card-body" style="background-color: rgba(0, 0, 0, 0.7);"> <!-- Darker semi-transparent background for better text visibility -->
+                        <h5 class="card-title" style="color: #FFD700;">{{ hotel.name }}</h5> <!-- Gold color for title -->
+                        <p class="card-text" style="color: #FFFFFF;">{{ hotel.description|truncatewords:20 }}</p> <!-- White text for description -->
+                        <p class="card-text" style="color: #F0E68C;"><strong>Address:</strong> {{ hotel.address }}</p> <!-- Khaki for address -->
+                        <p class="card-text" style="color: #F0E68C;"><strong>Contact:</strong> {{ hotel.mobile }}</p> <!-- Khaki for contact -->
+                        <p class="card-text" style="color: #F0E68C;"><strong>Status:</strong> {{ hotel.status }}</p> <!-- Khaki for status -->
+                        <a href="{% url 'hotel:hotel_detail' hotel.slug %}" class="btn btn-custom">View Details</a> <!-- Custom button class -->
+                    </div>
                 </div>
             </div>
-        </div>
-    {% empty %}
-        <div class="col-12">
-            <p>No hotels available at the moment.</p>
-        </div>
-    {% endfor %}
+        {% empty %}
+            <div class="col-12">
+                <p>No hotels available at the moment.</p>
+            </div>
+        {% endfor %}
+    </div>
 </div>
+
+<style>
+    .hotel-card {
+        transition: transform 0.2s; /* Smooth hover effect */
+    }
+    .hotel-card:hover {
+        transform: scale(1.05); /* Scale up on hover */
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5); /* Increase shadow on hover */
+    }
+    .card {
+        height: 300px; /* Set a fixed height for uniformity */
+        display: flex; /* Flexbox to allow proper alignment */
+        flex-direction: column; /* Stack content vertically */
+        justify-content: flex-end; /* Align items to the bottom */
+    }
+    .card-body {
+        padding: 15px; /* Padding for card body */
+        border-radius: 0 0 10px 10px; /* Rounded corners for card body */
+    }
+    .btn-custom {
+        color: white; /* White text for button */
+        background-color: #FF5733; /* Bright orange-red for button background */
+        border: none; /* No border */
+        transition: background-color 0.3s, transform 0.2s; /* Smooth transition for hover effect */
+        padding: 5px 10px; /* Smaller padding for a more compact button */
+        border-radius: 5px; /* Slightly rounded corners */
+    }
+    .btn-custom:hover {
+        background-color: #C70039; /* Darker red on hover */
+        transform: scale(1.05); /* Slightly scale up on hover */
+    }
+</style>
+{% endblock %}

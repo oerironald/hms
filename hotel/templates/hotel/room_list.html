@@ -11,7 +11,124 @@
             <li>
                 <h2>{{ room.room_type.type }} -[ {{ room.hotel.name }}]</h2>
                 <p>Room Number: {{ room.room_number }}</p>
-                <p>Price: {{ room.price }}</p>
+                <p>Room Number: {{ room.room_number }}</p>
+                <p>Room Number: {{ room.room_number }}</p>
+                <p>Price: {{ room.price {% extends 'hotel/base.html' %}
+
+{% block content %}
+<div class="container">
+    <h1 class="my-4">Booking for {{ room.room_type.type }} at {{ room.hotel.name }}</h1>
+
+    {% if error %}
+        <p class="error" style="color: red;">{{ error }}</p>
+    {% endif %}
+
+    <h2>Available Rooms</h2>
+
+    {% if rooms_with_availability %}
+        <div class="row room-list">
+            {% for room_info in rooms_with_availability %}
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100" style="border: none;">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ room_info.room.room_number }} - ${{ room_info.room.price }} per night</h5>
+                            {% if room_info.is_available %}
+                                <p style="color: green;">Status: Available for booking</p>
+                                <input type="radio" name="selected_room" id="room_{{ forloop.counter }}"
+                                       value="{{ room_info.room.id }}"
+                                       onclick="enableBookingButton()">
+                            {% else %}
+                                <p style="color: red;">Status: Occupied</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>No available rooms of this type at the moment.</p>
+    {% endif %}
+
+    <h2>Booking Details</h2>
+    <div class="card mb-4" style="background-color: #f8f9fa; border-radius: 8px;">
+        <div class="card-body">
+            <form method="post" action="{% url 'hotel:booking' room.id %}" id="booking-form">
+                {% csrf_token %}
+                <div id="booking-forms">
+                    <div class="booking-form mb-3">
+                        <label for="check_in_date_0">Check-in Date and Time:</label>
+                        <input type="datetime-local" name="check_in_date_0" id="check_in_date_0" required class="form-control">
+
+                        <label for="check_out_date_0" class="mt-2">Check-out Date and Time:</label>
+                        <input type="datetime-local" name="check_out_date_0" id="check_out_date_0" required class="form-control">
+
+                        <label for="num_adults_0" class="mt-2">Number of Adults:</label>
+                        <input type="number" name="num_adults_0" id="num_adults_0" min="1" value="1" required class="form-control">
+
+                        <label for="num_children_0" class="mt-2">Number of Children:</label>
+                        <input type="number" name="num_children_0" id="num_children_0" min="0" value="0" class="form-control">
+                    </div>
+                </div>
+                <button type="submit" id="book-now-button" class="btn btn-primary" disabled>Book Now</button>
+            </form>
+        </div>
+    </div>
+
+    <a href="{% url 'hotel:hotel_detail' room.hotel.slug %}" class="btn btn-secondary">Back to Hotel Details</a>
+</div>
+
+<script>
+    // Function to enable the Book Now button when a room is selected
+    function enableBookingButton() {
+        const bookingButton = document.getElementById('book-now-button');
+        bookingButton.disabled = false; // Enable the button
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const checkInInput = document.getElementById('check_in_date_0');
+        const checkOutInput = document.getElementById('check_out_date_0');
+        const numAdultsInput = document.getElementById('num_adults_0');
+        const numChildrenInput = document.getElementById('num_children_0');
+        const roomCapacity = {{ room.room_type.room_capacity }};
+
+        // Set minimum check-in date to today
+        checkInInput.min = new Date().toISOString().slice(0, 16);
+
+        // Function to validate dates and room capacity
+        function validateBooking() {
+            const checkInDate = new Date(checkInInput.value);
+            const checkOutDate = new Date(checkOutInput.value);
+            const numAdults = parseInt(numAdultsInput.value, 10);
+            const numChildren = parseInt(numChildrenInput.value, 10);
+            const totalGuests = numAdults + numChildren;
+
+            // Check for valid check-in and check-out dates
+            if (checkInInput.value && checkOutInput.value) {
+                if (checkInDate >= checkOutDate) {
+                    alert("Check-out date must be after check-in date.");
+                    return false;
+                }
+            }
+
+            // Check for room capacity
+            if (totalGuests > roomCapacity) {
+                alert("Total number of guests exceeds room capacity.");
+                return false;
+            }
+
+            return true;
+        }
+
+        // Add event listener to validate form before submission
+        document.getElementById('booking-form').addEventListener('submit', function(event) {
+            if (!validateBooking()) {
+                event.preventDefault(); // Prevent form submission if validation fails
+            }
+        });
+    });
+</script>
+{% endblock %}
+}}</p>
                 <p>Status: {% if room.is_available %} Available {% else %} Not Available {% endif %}</p>
                 <a href="{% url 'hotel:booking' room.id %}" class="btn btn-primary">Book Now</a>
             </li>

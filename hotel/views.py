@@ -40,10 +40,12 @@ def hotel_detail(request, slug):
 
 from django.shortcuts import get_object_or_404
 
+
 def room_type_detail(request, slug, rt_slug):
     hotel = get_object_or_404(Hotel, status="Live", slug=slug)
     room_type = get_object_or_404(RoomType, hotel=hotel, slug=rt_slug)
-    rooms = Room.objects.filter(room_type=room_type, is_available=True)
+    # Get all rooms for the specified room type
+    rooms = Room.objects.filter(room_type=room_type)
 
     # Get query parameters for availability
     checkin = request.GET.get('checkin')
@@ -62,7 +64,6 @@ def room_type_detail(request, slug, rt_slug):
     }
 
     return render(request, "hotel/room_type_detail.html", context)
-
 
 
 
