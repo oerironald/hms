@@ -19,6 +19,8 @@
             margin: 0;
             display: flex;
             flex-direction: column;
+            padding-top: 60px; /* Space for fixed navbar */
+            padding-bottom: 50px; /* Space for fixed footer */
         }
 
         /* Main content to take available space */
@@ -34,6 +36,10 @@
         .navbar-custom {
             background-color: #FF7F50; /* Coral (Orange) */
             color: #FFFFFF; /* White text */
+            position: fixed; /* Fixed position */
+            top: 0; /* At the top */
+            width: 100%; /* Full width */
+            z-index: 1000; /* Ensure it stays above other content */
         }
 
         .navbar-custom .navbar-brand,
@@ -50,7 +56,9 @@
             background-color: #4b9cd3; /* Light blue to complement sea spray */
             color: #FFFFFF;
             padding: 15px;
-            position: relative; /* Ensure footer stays at the bottom */
+            position: fixed; /* Fixed position */
+            bottom: 0; /* At the bottom */
+            width: 100%; /* Full width */
         }
 
         /* Navbar toggle icon color */
@@ -100,7 +108,7 @@
 
     <!-- Footer -->
     <footer class="footer-custom text-center">
-        <p>&copy; {% now "Y" %} Hotel Management System. All rights reserved.</p>
+        <p>&copy; {% now "Y" %} HMs. All rights reserved. Designed by: <i>J Ronald</i></p>
     </footer>
 
     <!-- Bootstrap JS Bundle for Navbar Toggle functionality -->
