@@ -19,20 +19,19 @@
             margin: 0;
             display: flex;
             flex-direction: column;
-            padding-top: 60px; /* Space for fixed navbar */
-            padding-bottom: 50px; /* Space for fixed footer */
         }
 
-        /* Main content to take available space */
+        /* Main content area */
         .container {
             flex: 1;
             background-color: #f0f8f0; /* Light mint green background for main content */
             border-radius: 10px; /* Rounded corners for the content area */
             padding: 20px; /* Added padding for spacing */
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Light shadow for depth */
+            margin-bottom: 100px; /* Increase this value to ensure footer doesn't obscure content */
         }
 
-        /* Orange Navbar Styling */
+        /* Fixed Navbar Styling */
         .navbar-custom {
             background-color: #FF7F50; /* Coral (Orange) */
             color: #FFFFFF; /* White text */
@@ -51,7 +50,7 @@
             color: #FFD700; /* Gold for hover effect */
         }
 
-        /* Footer Styling */
+        /* Fixed Footer Styling */
         .footer-custom {
             background-color: #4b9cd3; /* Light blue to complement sea spray */
             color: #FFFFFF;
@@ -73,7 +72,7 @@
 </head>
 <body>
 
-    <!-- Navbar -->
+    <!-- Fixed Navbar -->
     <nav class="navbar navbar-expand-lg navbar-custom">
         <div class="container-fluid">
             <a class="navbar-brand" href="#">Hotel Management</a>
@@ -106,7 +105,7 @@
         {% endblock %}
     </div>
 
-    <!-- Footer -->
+    <!-- Fixed Footer -->
     <footer class="footer-custom text-center">
         <p>&copy; {% now "Y" %} HMs. All rights reserved. Designed by: <i>J Ronald</i></p>
     </footer>

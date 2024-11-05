@@ -9,7 +9,7 @@
     {% if rooms %}
         <div class="row">
             {% for room in rooms %}
-                <div class="col-md-4 mb-3 outer-card"> <!-- Added 'outer-card' class for custom styling -->
+                <div class="col-md-4 mb-3 outer-card">
                     <div class="room-item border p-3 rounded d-flex flex-column">
                         <h3 style="font-family: 'Roboto', sans-serif; color: #1a73e8;">Room no: {{ room.room_number }}</h3>
                         <p style="font-family: 'Roboto', sans-serif; color: #1a73e8;">Room Type: {{ room.room_type.type }}</p>
@@ -33,7 +33,10 @@
     {% endif %}
 </div>
 
-<a href="{% url 'hotel:index' %}" class="btn btn-secondary">Back to Hotel List</a>
+<!-- Wrapper for button -->
+<div class="button-wrapper mt-3"> <!-- Optional margin-top for spacing -->
+    <a href="{% url 'hotel:index' %}" class="btn btn-secondary">Back to Hotel List</a>
+</div>
 
 <style>
     /* Background color and padding for .outer-card div */
@@ -106,5 +109,11 @@
         font-size: 14px;
         color: #555555;
     }
+
+    /* Button Wrapper Styling */
+    .button-wrapper {
+        margin-bottom: 80px; /* Adjust this value to the height of your footer */
+    }
 </style>
+
 {% endblock %}
