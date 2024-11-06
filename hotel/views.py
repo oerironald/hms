@@ -78,8 +78,23 @@ def room_list(request):
 
 class BookingView(View):
     def get(self, request, room_id):
-        # Your existing code
-        pass
+        room = get_object_or_404(Room, id=room_id)
+        room_type = room.room_type
+
+        all_rooms = Room.objects.filter(room_type=room_type)
+        rooms_with_availability = []
+        for room in all_rooms:
+            is_available = self.is_room_available(room)
+            rooms_with_availability.append({
+                'room': room,
+                'is_available': is_available
+            })
+
+        context = {
+            "room": room,
+            "rooms_with_availability": rooms_with_availability,
+        }
+        return render(request, "hotel/booking_form.html", context)
 
     def post(self, request, room_id):
         room = get_object_or_404(Room, id=room_id)
@@ -120,7 +135,6 @@ class BookingView(View):
 
             total_cost = room.price() * num_nights
 
-            # Only assign `user` if authenticated
             booking = Booking(
                 user=request.user if request.user.is_authenticated else None,
                 hotel=room.hotel,
