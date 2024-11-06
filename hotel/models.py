@@ -4,6 +4,7 @@ from django.utils.html import mark_safe
 from userauths.models import User
 from shortuuid.django_fields import ShortUUIDField
 import shortuuid
+from cloudinary.models import CloudinaryField
 
 # Choices for hotel status
 HOTEL_STATUS = (
@@ -41,7 +42,7 @@ class Hotel(models.Model):
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     name = models.CharField(max_length=100)  # Increased max_length for better name support
     description = models.TextField(null=True, blank=True)
-    image = models.ImageField(upload_to="hotel_gallery/")  # Change to ImageField
+    image = CloudinaryField('image')  # Change to ImageField
     address = models.CharField(max_length=200)
     mobile = models.CharField(max_length=20)
     email = models.EmailField(max_length=100)
@@ -68,7 +69,7 @@ class Hotel(models.Model):
 
 class HotelGallery(models.Model):
     hotel = models.ForeignKey('Hotel', on_delete=models.CASCADE)
-    image = models.ImageField(upload_to="hotel_gallery/")  # Change to ImageField
+    image = CloudinaryField('image')  # Change to ImageField
     hgid = ShortUUIDField(unique=True, length=10, max_length=20, alphabet="abcdefghijklmnopqrstuvwxyz")
 
     def __str__(self):
