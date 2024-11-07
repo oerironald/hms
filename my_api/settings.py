@@ -23,6 +23,7 @@ OPEN_WEATHER_API_KEY = os.getenv('OPEN_WEATHER_API_KEY')
 import cloudinary
 import cloudinary.uploader
 import cloudinary.api
+import dj_database_url
 
 cloudinary.config(
     cloud_name = "depxev0is",
@@ -80,6 +81,7 @@ INSTALLED_APPS = [
     'userauths',
     'booking',
     'cloudinary',
+
 
     
     
@@ -142,7 +144,9 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+DATABASES["default"] = dj_database_url.parse("postgresql://hmsdb_ehxk_user:td6M9qNlJHBNCvCh7aL0EnfdDJnJkta1@dpg-csljglpu0jms73f7n5r0-a.oregon-postgres.render.com/hmsdb_ehxk")
 
+# postgresql://hmsdb_ehxk_user:td6M9qNlJHBNCvCh7aL0EnfdDJnJkta1@dpg-csljglpu0jms73f7n5r0-a.oregon-postgres.render.com/hmsdb_ehxk
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
