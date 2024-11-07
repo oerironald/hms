@@ -146,7 +146,7 @@ DATABASES = {
 }
 DATABASES["default"] = dj_database_url.parse("postgresql://hmsdb_ehxk_user:td6M9qNlJHBNCvCh7aL0EnfdDJnJkta1@dpg-csljglpu0jms73f7n5r0-a.oregon-postgres.render.com/hmsdb_ehxk")
 
-# postgresql://hmsdb_ehxk_user:td6M9qNlJHBNCvCh7aL0EnfdDJnJkta1@dpg-csljglpu0jms73f7n5r0-a.oregon-postgres.render.com/hmsdb_ehxk
+
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
