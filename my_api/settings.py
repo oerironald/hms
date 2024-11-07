@@ -127,24 +127,33 @@ WSGI_APPLICATION = 'my_api.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
-#DATABASES = {
-   # 'default': {
-    #    'ENGINE': 'django.db.backends.mysql',
-     #   'NAME': 'django',
-     #   'USER': 'root',
-     #   'PASSWORD': 'root',
-     #   'HOST': 'localhost',
-     #   'PORT': '3306',
-   # }
-#}
+import os
+
 
 DATABASES = {
-    'default': {
-       'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': os.getenv('DB_NAME', 'postgres'),
+            'USER': os.getenv('DB_USER', 'postgres.vixncwjbsvgeahprhsyy'),
+            'PASSWORD': os.getenv('DB_PASSWORD', 'Egesusu0725#'),
+            'HOST': os.getenv('DB_HOST', 'aws-0-eu-central-1.pooler.supabase.com'),
+            'PORT': os.getenv('DB_PORT', '6543'),
+            'CONN_MAX_AGE': 600,    # Keeps connections open for 10 minutes
+            'OPTIONS': {
+                'sslmode': 'require',  # Ensures SSL connection for security
+            },
+        }
     }
-}
-DATABASES["default"] = dj_database_url.parse("postgresql://hmsdb_ehxk_user:td6M9qNlJHBNCvCh7aL0EnfdDJnJkta1@dpg-csljglpu0jms73f7n5r0-a.oregon-postgres.render.com/hmsdb_ehxk")
+
+# DATABASES["default"] = dj_database_url.config(conn_max_age=600, ssl_require=True)
+
+# DATABASES = {
+#     'default': {
+#        'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
+# DATABASES["default"] = dj_database_url.parse("postgresql://hmsdb_ehxk_user:td6M9qNlJHBNCvCh7aL0EnfdDJnJkta1@dpg-csljglpu0jms73f7n5r0-a.oregon-postgres.render.com/hmsdb_ehxk")
 
 
 
