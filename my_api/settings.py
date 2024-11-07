@@ -235,7 +235,7 @@ AUTH_USER_MODEL = 'userauths.User'
 JAZZMIN_SETTINGS = {
     'site_header': "The_One",
     'site_brand': "Techies.",
-    'site_logo': "/images/logo.png",
+    'site_logo': "/images/hotel.png",
     'copyright':  "Jogoo Ronald",
     "welcome_sign": "Welcome to The_One, Login Now.",
     "topmenu_links": [
