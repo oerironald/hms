@@ -7,7 +7,10 @@ from django.views import View
 from django.utils import timezone
 from datetime import datetime
 from django.core.exceptions import ValidationError
-
+from django_daraja.mpesa.core import MpesaClient
+from django.shortcuts import render, redirect, reverse
+from django.http import HttpResponse, HttpResponseBadRequest
+from .models import Room, Booking
 
 
 def index(request):
@@ -75,7 +78,6 @@ def room_list(request):
     return render(request, "hotel/room_list.html", context)
 
 
-
 class BookingView(View):
     def get(self, request, room_id):
         room = get_object_or_404(Room, id=room_id)
@@ -100,6 +102,9 @@ class BookingView(View):
         room = get_object_or_404(Room, id=room_id)
         bookings_data = []
         index = 0
+
+        # Capture the payment method from the form
+        payment_method = request.POST.get('payment_method')  # 'MPESA' or 'CASH'
 
         while True:
             check_in_date = request.POST.get(f'check_in_date_{index}')
@@ -135,6 +140,7 @@ class BookingView(View):
 
             total_cost = room.price() * num_nights
 
+            # Create booking and add payment method
             booking = Booking(
                 user=request.user if request.user.is_authenticated else None,
                 hotel=room.hotel,
@@ -145,8 +151,13 @@ class BookingView(View):
                 num_adults=num_adults,
                 num_children=num_children,
                 is_active=True,
-                date=timezone.now()
+                date=timezone.now(),
+                payment_status=payment_method,  # Save payment method
             )
+
+            if payment_method == 'CASH':
+                booking.cash_payment_received = False  # Initially set to False, will be updated later
+
             booking.save()
             bookings_data.append(booking)
 
@@ -225,3 +236,96 @@ def check_availability(request):
         available_rooms = available_rooms.exclude(id__in=booked_room_ids)
 
     return render(request, 'hotel/check_availability.html', {'available_rooms': available_rooms})
+
+
+
+
+
+import json
+from django.http import JsonResponse
+from django_daraja.mpesa.core import MpesaClient
+from django.urls import reverse
+import json
+from django.http import JsonResponse, HttpResponseBadRequest
+
+from django.shortcuts import get_object_or_404
+from django.http import JsonResponse, HttpResponseBadRequest
+from django_daraja.mpesa.core import MpesaClient
+from .models import Booking
+import json
+
+from django.http import JsonResponse, HttpResponseBadRequest
+import json
+
+def mpesa_payment(request, booking_id):
+    if request.method == "POST":
+        # Parse the request data
+        try:
+            data = json.loads(request.body)
+        except json.JSONDecodeError:
+            return HttpResponseBadRequest("Invalid JSON data")
+
+        phone_number = data.get("phone_number")
+        amount = data.get("amount")
+
+        if not phone_number or not amount:
+            return HttpResponseBadRequest("Phone number and amount are required")
+
+        # Ensure the phone number is in the correct format
+        if phone_number.startswith("0"):
+            phone_number = "254" + phone_number[1:]
+
+        # Initialize the MpesaClient
+        mpesa_client = MpesaClient()
+
+        # Set the required parameters
+        account_reference = f"Booking-{booking_id}"
+        transaction_desc = "Room booking payment"
+        callback_url = "https://your-domain.com/hotel/mpesa_callback/"  # Update with your callback URL
+
+        try:
+            # Make the STK push request
+            response = mpesa_client.stk_push(phone_number, int(amount), account_reference, transaction_desc, callback_url)
+            print("M-Pesa API Response:", response)
+
+            # Check if the response is an HTTP response object
+            if response.status_code == 200:
+                # Assuming the response is in JSON format
+                try:
+                    response_data = response.json()  # Extract the JSON data from the response
+                    print("M-Pesa Response Data:", response_data)
+
+                    # Check if 'ResponseCode' is in the response data
+                    if response_data.get("ResponseCode") == "0":
+                        return JsonResponse({"ResponseCode": "0", "message": "Payment initiated successfully"}, status=200)
+                    else:
+                        error_message = response_data.get("errorMessage", "Payment failed")
+                        return JsonResponse({"ResponseCode": response_data.get("ResponseCode", "Unknown"), "message": error_message}, status=400)
+
+                except ValueError:
+                    # Handle case where response is not valid JSON
+                    return JsonResponse({"error": "Invalid response format"}, status=400)
+
+            else:
+                # Handle case where the HTTP response code is not 200
+                return JsonResponse({"error": "M-Pesa API request failed"}, status=400)
+
+        except Exception as e:
+            print("Error during M-Pesa payment:", str(e))
+            return JsonResponse({"error": str(e)}, status=500)
+
+    return JsonResponse({"error": "Invalid request method"}, status=405)
+from django.http import JsonResponse
+
+def mpesa_callback(request):
+    # Handle the callback from M-Pesa
+    if request.method == 'POST':
+        # Log or process the incoming data
+        data = request.body.decode('utf-8')  # Get the response data from M-Pesa
+        print(f"Callback data: {data}")  # Optionally log the response
+
+        # You may want to save payment status, transaction details, etc.
+        # Process the callback here, then respond with success
+        return JsonResponse({'status': 'success'})
+    return JsonResponse({'status': 'failed'}, status=400)
+

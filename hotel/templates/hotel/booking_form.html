@@ -5,118 +5,98 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Booking for {{ room.room_type.type }} at {{ room.hotel.name }}</title>
     <style>
+        /* Basic styling */
         body {
             font-family: Arial, sans-serif;
             background-color: #f8f9fa;
             color: #333;
-            margin: 0;
             padding: 20px;
         }
         h1, h2 {
-            color: #007bff; /* Primary color */
-        }
-        .error {
-            color: red;
-        }
-        .room-list {
-            margin: 20px 0;
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-between;
+            color: #007bff;
         }
         .room-item {
+            background-color: #e3f2fd;
+            padding: 15px;
             border: 1px solid #ccc;
             border-radius: 5px;
-            background-color: #e3f2fd;
-            margin: 10px;
-            padding: 15px;
-            width: 30%;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            transition: transform 0.2s;
-        }
-        .room-item:hover {
-            transform: scale(1.02);
+            margin-bottom: 20px;
         }
         .room-item h3 {
-            margin: 0 0 10px;
+            margin-bottom: 10px;
         }
         .room-item p {
-            margin: 0;
+            margin: 5px 0;
         }
-        a {
-            display: inline-block;
-            margin-top: 10px;
-            color: #007bff;
-            text-decoration: none;
+        .room-item span {
+            font-weight: bold;
         }
-        button {
-            margin-top: 20px;
-            padding: 10px 15px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-
-        /* Modal styles */
         .modal {
             display: none;
             position: fixed;
-            z-index: 1;
             left: 0;
             top: 0;
             width: 100%;
             height: 100%;
-            overflow: auto;
             background-color: rgba(0, 0, 0, 0.6);
+            z-index: 9999; /* Ensure the modal is on top of other content */
+            overflow: auto;
+            padding: 10px;
         }
         .modal-content {
-            background-color: #d4f0e9;
-            margin: 5% auto;
+            background-color: #fff;
+            margin: 10% auto;
             padding: 20px;
-            border-radius: 8px;
             width: 90%;
-            max-width: 600px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-            border: 1px solid #007bff;
+            max-width: 600px; /* Max width for larger screens */
+            max-height: 80vh; /* Max height for the modal */
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            overflow-y: auto; /* Enable scrolling if content overflows */
         }
-        .modal-header, .modal-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-bottom: 10px;
+        h2 {
+            font-size: 1.5em;
+            text-align: center;
         }
-        .modal-header h2 {
-            margin: 0;
-            color: #007bff;
-        }
-        .close {
-            color: #aaa;
-            font-size: 28px;
+        label {
             font-weight: bold;
-            cursor: pointer;
+            margin-top: 10px;
         }
-        .close:hover,
-        .close:focus {
-            color: #007bff;
-        }
-        .booking-form label {
-            display: block;
-            margin: 10px 0 5px;
-        }
-        .booking-form input {
+        input, select {
             width: 100%;
             padding: 10px;
-            margin-bottom: 10px;
+            margin-top: 5px;
+            border-radius: 5px;
             border: 1px solid #ccc;
-            border-radius: 4px;
         }
-        .modal-footer {
-            padding-top: 10px;
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 15px;  /* Adjusted padding to make the button appropriately sized */
+            cursor: pointer;
+            margin-top: 10px;
+            border-radius: 5px;
+            width: auto; /* Adjusted for a more compact button size */
+            font-size: 1rem; /* Set a comfortable font size */
+        }
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        button + button {
+            margin-top: 10px;
+        }
+        /* Mobile responsiveness */
+        @media (max-width: 600px) {
+            .modal-content {
+                width: 95%; /* Use most of the screen width on small devices */
+                max-width: 95%;
+                padding: 15px;
+            }
+            h2 {
+                font-size: 1.2em; /* Adjust heading size */
+            }
         }
     </style>
 </head>
@@ -124,122 +104,165 @@
 
 <h1>Booking for {{ room.room_type.type }} at {{ room.hotel.name }}</h1>
 
-{% if error %}
-    <p class="error">{{ error }}</p>
-{% endif %}
-
 <h2>Available Rooms</h2>
 
-{% if rooms_with_availability %}
-    <div class="room-list">
-        {% for room_info in rooms_with_availability %}
-            <div class="room-item">
-                <h3>{{ room_info.room.room_number }} - Kshs. {{ room_info.room.price }} per night</h3>
-                {% if room_info.is_available %}
-                    <p style="color: green;">Status: Available for booking</p>
-                    <label for="room_{{ forloop.counter }}">
-                        <input type="radio" name="selected_room" id="room_{{ forloop.counter }}"
-                               value="{{ room_info.room.id }}" onclick="showBookingDetails(this)">
-                        Select this room
-                    </label>
-                {% else %}
-                    <p style="color: red;">Status: Occupied</p>
-                {% endif %}
-            </div>
-        {% endfor %}
-    </div>
-{% else %}
-    <p>No available rooms of this type at the moment.</p>
-{% endif %}
+<div class="room-list">
+    {% for room_info in rooms_with_availability %}
+        <div class="room-item">
+            <h3>Room Number: {{ room_info.room.room_number }}</h3>
+            <p><span>Price per Night:</span> Kshs. {{ room_info.room.price }}</p>
+            <p><span>Number of Visitors:</span> {{ room_info.room.room_type.room_capacity }}</p>
+            <p><span>Availability:</span> {% if room_info.is_available %} Available {% else %} Occupied {% endif %}</p>
+            <p><span>Span of Stay:</span> From {{ room_info.room.check_in_date }} to {{ room_info.room.check_out_date }}</p>
 
-<!-- Modal for Booking Details -->
+            {% if room_info.is_available %}
+                <button onclick="showBookingDetails({{ room_info.room.id }}, {{ room_info.room.price }})">Book Now</button>
+            {% else %}
+                <p style="color: red;">Currently occupied</p>
+            {% endif %}
+        </div>
+    {% endfor %}
+</div>
+
+<!-- Booking Modal -->
 <div id="bookingModal" class="modal">
     <div class="modal-content">
-        <div class="modal-header">
-            <h2>Booking Details</h2>
-            <span class="close" onclick="closeModal()">&times;</span>
-        </div>
-        <form method="post" action="{% url 'hotel:booking' room.id %}" id="booking-form">
+        <h2>Booking Details</h2>
+        <form id="booking-form">
             {% csrf_token %}
-            <div class="booking-form">
-                <label for="check_in_date_0">Check-in Date and Time:</label>
-                <input type="datetime-local" name="check_in_date_0" id="check_in_date_0" required>
+            <input type="hidden" id="room_id">
+            <input type="hidden" id="amount">
 
-                <label for="check_out_date_0">Check-out Date and Time:</label>
-                <input type="datetime-local" name="check_out_date_0" id="check_out_date_0" required>
+            <!-- Check-in and Check-out Dates -->
+            <label for="check_in_date">Check-in Date:</label>
+            <input type="datetime-local" id="check_in_date" required>
 
-                <label for="num_adults_0">Number of Adults:</label>
-                <input type="number" name="num_adults_0" id="num_adults_0" min="1" value="1" required>
+            <label for="check_out_date">Check-out Date:</label>
+            <input type="datetime-local" id="check_out_date" required>
 
-                <label for="num_children_0">Number of Children:</label>
-                <input type="number" name="num_children_0" id="num_children_0" min="0" value="0">
+            <!-- Number of adults and children -->
+            <label for="num_adults">Number of Adults:</label>
+            <input type="number" id="num_adults" value="1" min="1" required>
+
+            <label for="num_children">Number of Children:</label>
+            <input type="number" id="num_children" value="0" min="0" required>
+
+            <label for="payment_method">Select Payment Method:</label>
+            <select id="payment_method" required>
+                <option value="MPESA">M-Pesa</option>
+                <option value="CASH">Cash</option>
+            </select>
+
+            <!-- M-Pesa phone number input -->
+            <div id="mpesa-details" style="display: none;">
+                <label for="phone_number">Phone Number (for M-Pesa):</label>
+                <input type="tel" id="phone_number" placeholder="Enter phone number" required>
             </div>
-            <div class="modal-footer">
-                <button type="submit" id="book-now-button">Book Now</button>
-            </div>
+
+            <button type="button" onclick="handlePayment()">Proceed to Pay</button>
+            <button type="button" onclick="closeModal()">Cancel</button>
         </form>
     </div>
 </div>
 
-<a href="{% url 'hotel:hotel_detail' room.hotel.slug %}">Back to Hotel Details</a>
-
 <script>
-    function showBookingDetails(radioButton) {
+    // Display booking modal
+    function showBookingDetails(roomId, amount) {
+        document.getElementById('room_id').value = roomId;
+        document.getElementById('amount').value = amount;
         document.getElementById('bookingModal').style.display = 'block';
-        const bookingButton = document.getElementById('book-now-button');
-        bookingButton.disabled = false;
-
-        const checkInInput = document.getElementById('check_in_date_0');
-        checkInInput.min = new Date().toISOString().slice(0, 16);
-        document.getElementById('booking-form').reset();
     }
 
+    // Close booking modal
     function closeModal() {
         document.getElementById('bookingModal').style.display = 'none';
+        resetModal();
     }
 
-    window.onclick = function(event) {
-        const modal = document.getElementById('bookingModal');
-        if (event.target == modal) {
-            modal.style.display = "none";
-        }
+    // Reset modal contents after payment or cancellation
+    function resetModal() {
+        document.getElementById('check_in_date').value = '';
+        document.getElementById('check_out_date').value = '';
+        document.getElementById('num_adults').value = 1;
+        document.getElementById('num_children').value = 0;
+        document.getElementById('payment_method').value = 'MPESA';
+        document.getElementById('phone_number').value = '';
+        document.getElementById('mpesa-details').style.display = 'none';
     }
 
-    document.addEventListener('DOMContentLoaded', function() {
-        const checkInInput = document.getElementById('check_in_date_0');
-        const checkOutInput = document.getElementById('check_out_date_0');
-        const numAdultsInput = document.getElementById('num_adults_0');
-        const numChildrenInput = document.getElementById('num_children_0');
-        const roomCapacity = {{ room.room_type.room_capacity }};
-
-        function validateBooking() {
-            const checkInDate = new Date(checkInInput.value);
-            const checkOutDate = new Date(checkOutInput.value);
-            const numAdults = parseInt(numAdultsInput.value, 10);
-            const numChildren = parseInt(numChildrenInput.value, 10);
-            const totalGuests = numAdults + numChildren;
-
-            if (checkInInput.value && checkOutInput.value) {
-                if (checkInDate >= checkOutDate) {
-                    alert("Check-out date must be after check-in date.");
-                    return false;
-                }
-            }
-
-            if (totalGuests > roomCapacity) {
-                alert("Total number of guests exceeds room capacity.");
-                return false;
-            }
-
-            return true;
+    // Handle payment method selection and show/hide phone number input for M-Pesa
+    document.getElementById('payment_method').addEventListener('change', function() {
+        const paymentMethod = this.value;
+        const mpesaDetails = document.getElementById('mpesa-details');
+        if (paymentMethod === 'MPESA') {
+            mpesaDetails.style.display = 'block'; // Show phone number input
+        } else {
+            mpesaDetails.style.display = 'none';  // Hide phone number input
         }
-
-        document.getElementById('booking-form').addEventListener('submit', function(event) {
-            if (!validateBooking()) {
-                event.preventDefault();
-            }
-        });
     });
+
+    // Handle the booking process and payment method selection
+    // Handle the booking process and payment method selection
+async function handlePayment() {
+    const roomId = document.getElementById('room_id').value;
+    const amount = document.getElementById('amount').value;
+    const checkInDate = document.getElementById('check_in_date').value;
+    const checkOutDate = document.getElementById('check_out_date').value;
+    const numAdults = document.getElementById('num_adults').value;
+    const numChildren = document.getElementById('num_children').value;
+    const paymentMethod = document.getElementById('payment_method').value;
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    let phoneNumber = null;
+
+    // Validate required fields
+    if (!checkInDate || !checkOutDate || !numAdults || !paymentMethod) {
+        alert("Please fill out all required fields.");
+        return;
+    }
+
+    if (paymentMethod === 'MPESA') {
+        phoneNumber = document.getElementById('phone_number').value;
+        if (!phoneNumber) {
+            alert("Please provide a valid phone number for M-Pesa.");
+            return;
+        }
+    }
+
+    try {
+        const response = await fetch(`/hotel/mpesa_payment/${roomId}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify({
+                phone_number: phoneNumber,  // Only send this if M-Pesa is selected
+                amount: amount,
+                check_in_date: checkInDate,
+                check_out_date: checkOutDate,
+                num_adults: numAdults,
+                num_children: numChildren,
+                payment_method: paymentMethod
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        if (data.ResponseCode === "0") {
+            alert(data.message || "Payment initiated.");
+            closeModal();
+        } else {
+            alert(data.error || "Failed to initiate payment.");
+        }
+    } catch (error) {
+        console.error("Fetch Error:", error);
+        alert("An error occurred. Please try again.");
+    }
+}
+
 </script>
 
 </body>

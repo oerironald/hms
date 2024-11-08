@@ -16,6 +16,8 @@ urlpatterns = [
     path('booking/success/<str:booking_id>/', views.BookingSuccessView.as_view(), name='booking_success'),
     path('booking/failure/', views.BookingFailureView.as_view(), name='booking_failure'),
     path('room-availability/', views.check_availability, name='check_availability'),
+    path('mpesa_payment/<str:booking_id>/', views.mpesa_payment, name='mpesa_payment'),
+    path('mpesa_callback/', views.mpesa_callback, name='mpesa_callback'),
     # Other paths...
 ]
 

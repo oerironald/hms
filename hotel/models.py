@@ -26,6 +26,8 @@ ICON_TYPE = (
 
 # Choices for payment status
 PAYMENT_STATUS = (
+    ('MPESA', 'M-Pesa'),
+    ('CASH', 'Cash'),
     ("paid", "Paid"),
     ("pending", "Pending"),
     ("processing", "Processing"),
@@ -168,19 +170,21 @@ class Booking(models.Model):
     checked_in_tracker = models.BooleanField(default=False)
     checked_out_tracker = models.BooleanField(default=False)
     date = models.DateTimeField(auto_now_add=True)
-    stripe_payment_intent = models.CharField(max_length=1000, null=True, blank=True)
+    mpesa_payment_intent = models.CharField(max_length=1000, null=True, blank=True)
     success_id = models.CharField(max_length=1000, null=True, blank=True)
     booking_id = ShortUUIDField(unique=True, length=10, max_length=20)
 
     # Add the following fields
     num_adults = models.IntegerField(default=1)  # Default to 1 adult
     num_children = models.IntegerField(default=0)  # Default to 0 children
+    cash_payment_received = models.BooleanField(default=False)  # Track if cash payment was received
 
     def __str__(self):
         return f"{self.booking_id}"
 
     def rooms(self):
         return self.room.all().count()
+
 
 
 class ActivityLog(models.Model):
