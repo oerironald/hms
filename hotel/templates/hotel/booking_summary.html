@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking Summary</title>
+</head>
+<body>
+    <h2>Booking Summary</h2>
+
+    <p><strong>Booking ID:</strong> {{ booking.booking_id }}</p>
+    <p><strong>Check-in Date:</strong> {{ booking.check_in_date }}</p>
+    <p><strong>Check-out Date:</strong> {{ booking.check_out_date }}</p>
+    <p><strong>Number of Adults:</strong> {{ booking.num_adults }}</p>
+    <p><strong>Number of Children:</strong> {{ booking.num_children }}</p>
+    <p><strong>Total Amount:</strong> {{ booking.total }}</p>
+    <p><strong>Payment Status:</strong> {{ booking.payment_status }}</p>
+
+    <a href="/hotel/">Go back to booking</a>
+<a href="{% url 'hotel:generate_pdf' booking.id %}" class="button">Download PDF Receipt</a>
+</body>
+</html>

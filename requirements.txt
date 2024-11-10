@@ -22,3 +22,5 @@ shortuuid
 cloudinary
 psycopg2-binary
 dj-database-url
+reportlab
+WeasyPrint

@@ -16,8 +16,13 @@ urlpatterns = [
     path('booking/success/<str:booking_id>/', views.BookingSuccessView.as_view(), name='booking_success'),
     path('booking/failure/', views.BookingFailureView.as_view(), name='booking_failure'),
     path('room-availability/', views.check_availability, name='check_availability'),
-    path('mpesa_payment/<str:booking_id>/', views.mpesa_payment, name='mpesa_payment'),
+    path('mpesa_payment/<int:booking_id>/', views.mpesa_payment, name='mpesa_payment'),
+    path('cash_payment/<int:booking_id>/', views.cash_payment, name='cash_payment'),
     path('mpesa_callback/', views.mpesa_callback, name='mpesa_callback'),
+    path('generate_pdf/<int:booking_id>/', views.generate_pdf, name='generate_pdf'),  # Updated to booking_id
+    path('booking_summary/<int:booking_id>/', views.booking_summary, name='booking_summary'),
+    path('save_receipt/', views.save_receipt, name='save_receipt'),
+
     # Other paths...
 ]
 

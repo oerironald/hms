@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Receipt</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        h1 { text-align: center; }
+        p { margin: 0; padding: 5px 0; }
+    </style>
+</head>
+<body>
+    <h1>Booking Receipt</h1>
+    <p><strong>Booking ID:</strong> {{ booking.id }}</p>
+    <p><strong>Check-in Date:</strong> {{ booking.check_in_date }}</p>
+    <p><strong>Check-out Date:</strong> {{ booking.check_out_date }}</p>
+    <p><strong>Number of Adults:</strong> {{ booking.num_adults }}</p>
+    <p><strong>Number of Children:</strong> {{ booking.num_children }}</p>
+    <p><strong>Phone Number:</strong> {{ booking.phone_number }}</p>
+    <p><strong>Payment Method:</strong> {{ booking.payment_method }}</p>
+    <p><strong>Paid Amount:</strong> {{ booking.paid_amount }}</p>
+</body>
+</html>

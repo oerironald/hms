@@ -1,17 +1,23 @@
 # hotel/views.py
-from django.shortcuts import render
 from hotel.models import Hotel, Booking,ActivityLog, StaffOnDuty, Room, RoomType
-from django.shortcuts import get_object_or_404
-from django.shortcuts import redirect
 from django.views import View
-from django.utils import timezone
-from datetime import datetime
-from django.core.exceptions import ValidationError
-from django_daraja.mpesa.core import MpesaClient
 from django.shortcuts import render, redirect, reverse
-from django.http import HttpResponse, HttpResponseBadRequest
-from .models import Room, Booking
-
+from django.http import HttpResponse
+from django.template.loader import render_to_string
+from .models import Room, Booking  # Adjust as per your models
+from django.http import JsonResponse, HttpResponseBadRequest
+from django.utils import timezone
+from dateutil import parser
+from django_daraja.mpesa.core import MpesaClient
+from .models import Booking
+from django.shortcuts import get_object_or_404
+import os
+import json
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.conf import settings
+from xhtml2pdf import pisa
+from datetime import datetime
 
 def index(request):
     hotels = Hotel.objects.filter(status="Live")  # Fetch live hotels
@@ -20,10 +26,6 @@ def index(request):
         "hotels": hotels  # Pass the hotels context to the template
     }
     return render(request, "hotel/hotel_list.html", context)  # Ensure context is passed
-
-
-# hotel/views.py
-
 
 
 
@@ -40,8 +42,6 @@ def hotel_detail(request, slug):
     }
     return render(request, "hotel/hotel_detail.html", context)  # Render the detail template
 
-
-from django.shortcuts import get_object_or_404
 
 
 def room_type_detail(request, slug, rt_slug):
@@ -238,84 +238,144 @@ def check_availability(request):
     return render(request, 'hotel/check_availability.html', {'available_rooms': available_rooms})
 
 
-
-
-
-import json
-from django.http import JsonResponse
-from django_daraja.mpesa.core import MpesaClient
-from django.urls import reverse
-import json
 from django.http import JsonResponse, HttpResponseBadRequest
-
-from django.shortcuts import get_object_or_404
-from django.http import JsonResponse, HttpResponseBadRequest
-from django_daraja.mpesa.core import MpesaClient
-from .models import Booking
+from django.views.decorators.csrf import csrf_exempt
 import json
 
-from django.http import JsonResponse, HttpResponseBadRequest
-import json
+import logging
 
+@csrf_exempt
 def mpesa_payment(request, booking_id):
     if request.method == "POST":
-        # Parse the request data
         try:
             data = json.loads(request.body)
         except json.JSONDecodeError:
             return HttpResponseBadRequest("Invalid JSON data")
 
         phone_number = data.get("phone_number")
-        amount = data.get("amount")
+        paid_amount = data.get("paid_amount")
 
-        if not phone_number or not amount:
-            return HttpResponseBadRequest("Phone number and amount are required")
+        if not phone_number or not paid_amount:
+            return HttpResponseBadRequest("Phone number and paid amount are required")
 
-        # Ensure the phone number is in the correct format
         if phone_number.startswith("0"):
             phone_number = "254" + phone_number[1:]
 
-        # Initialize the MpesaClient
-        mpesa_client = MpesaClient()
-
-        # Set the required parameters
-        account_reference = f"Booking-{booking_id}"
-        transaction_desc = "Room booking payment"
-        callback_url = "https://your-domain.com/hotel/mpesa_callback/"  # Update with your callback URL
-
         try:
-            # Make the STK push request
-            response = mpesa_client.stk_push(phone_number, int(amount), account_reference, transaction_desc, callback_url)
-            print("M-Pesa API Response:", response)
+            room = Room.objects.get(id=booking_id)
+            booking = Booking.objects.filter(room=room, is_active=True).first()
 
-            # Check if the response is an HTTP response object
+            if not booking:
+                return JsonResponse({"error": "No active booking found for this room"}, status=404)
+
+            # Initialize the MpesaClient
+            mpesa_client = MpesaClient()  # Create an instance of the MpesaClient
+
+            # Assuming you have a valid callback_url defined somewhere
+            callback_url = "https://your-domain.com/hotel/mpesa_callback/"
+
+            response = mpesa_client.stk_push(phone_number, int(paid_amount), "Booking", "Room booking payment", callback_url)
+
             if response.status_code == 200:
-                # Assuming the response is in JSON format
-                try:
-                    response_data = response.json()  # Extract the JSON data from the response
-                    print("M-Pesa Response Data:", response_data)
+                response_data = response.json()
 
-                    # Check if 'ResponseCode' is in the response data
-                    if response_data.get("ResponseCode") == "0":
-                        return JsonResponse({"ResponseCode": "0", "message": "Payment initiated successfully"}, status=200)
-                    else:
-                        error_message = response_data.get("errorMessage", "Payment failed")
-                        return JsonResponse({"ResponseCode": response_data.get("ResponseCode", "Unknown"), "message": error_message}, status=400)
+                if response_data.get("ResponseCode") == "0":
+                    # Mark room as unavailable
+                    room.is_available = False
+                    room.save()
 
-                except ValueError:
-                    # Handle case where response is not valid JSON
-                    return JsonResponse({"error": "Invalid response format"}, status=400)
+                    # Use the existing booking's check-in date to format the filename
+                    check_in_datetime = booking.check_in_date.strftime('%Y%m%d_%H%M%S')  # Include hours and minutes
+                    pdf_filename = f"{phone_number}_{check_in_datetime}.pdf"
+
+                    # Create PDF receipt (implement this function)
+                    create_pdf_receipt(booking, pdf_filename)
+
+                    return JsonResponse({"ResponseCode": "0", "message": "Payment initiated successfully", "receipt": pdf_filename}, status=200)
+
+                else:
+                    return JsonResponse({"ResponseCode": response_data.get("ResponseCode", "Unknown"), "message": response_data.get("errorMessage", "Payment failed")}, status=400)
 
             else:
-                # Handle case where the HTTP response code is not 200
                 return JsonResponse({"error": "M-Pesa API request failed"}, status=400)
 
-        except Exception as e:
-            print("Error during M-Pesa payment:", str(e))
-            return JsonResponse({"error": str(e)}, status=500)
+        except Room.DoesNotExist:
+            return JsonResponse({"error": "Room not found"}, status=404)
 
     return JsonResponse({"error": "Invalid request method"}, status=405)
-from django.http import JsonResponse
+
+
+
+@csrf_exempt
+def cash_payment(request, booking_id):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            check_in_date = data.get("check_in_date")
+            check_out_date = data.get("check_out_date")
+            paid_amount = float(data.get("paid_amount"))
+
+            if not check_in_date or not check_out_date or paid_amount is None:
+                return HttpResponseBadRequest("Check-in date, check-out date, and paid amount are required")
+
+            check_in_date = timezone.make_aware(parser.parse(check_in_date))
+            check_out_date = timezone.make_aware(parser.parse(check_out_date))
+
+            room = Room.objects.get(id=booking_id)
+
+            if not room.is_available:
+                return JsonResponse({"error": "Room is not available for the selected dates"}, status=400)
+
+            room_type = room.room_type
+            total_amount = room_type.price * (check_out_date - check_in_date).days
+
+            if paid_amount < total_amount:
+                return JsonResponse({"error": "Paid amount is less than the total amount"}, status=400)
+
+            booking = Booking.objects.create(
+                user=None,
+                payment_status="CASH",
+                room_type=room_type,
+                hotel=room_type.hotel,
+                check_in_date=check_in_date,
+                check_out_date=check_out_date,
+                num_adults=int(data.get("num_adults", 1)),
+                num_children=int(data.get("num_children", 0)),
+                total=total_amount,
+                before_discount=total_amount,
+                cash_payment_received=True,
+                is_active=True
+            )
+
+            booking.room.add(room)
+            room.is_available = False
+            room.save()
+
+            # Generate receipt PDF filename
+            check_in_datetime = check_in_date.strftime('%Y%m%d_%H%M%S')
+            pdf_filename = f"{data.get('phone_number')}_{check_in_datetime}.pdf"
+
+            # Create PDF receipt
+            create_pdf_receipt(booking, pdf_filename)
+
+            return JsonResponse({
+                "success": True,
+                "message": "Cash payment recorded successfully",
+                "receipt": pdf_filename
+            }, status=200)
+
+        except Room.DoesNotExist:
+            return JsonResponse({"error": "Room not found"}, status=404)
+
+        except Exception as e:
+            return JsonResponse({"error": "Internal server error"}, status=500)
+
+    return JsonResponse({"error": "Invalid request method"}, status=405)
+
+def create_pdf_receipt(booking, filename):
+    # Implement your PDF generation logic here
+    # Use the filename to save the PDF
+    pass
 
 def mpesa_callback(request):
     # Handle the callback from M-Pesa
@@ -329,3 +389,72 @@ def mpesa_callback(request):
         return JsonResponse({'status': 'success'})
     return JsonResponse({'status': 'failed'}, status=400)
 
+
+
+def generate_pdf(request, booking_id):
+    # Fetch the booking object
+    booking = get_object_or_404(Booking, id=booking_id)
+
+    # Render the HTML template for the PDF
+    html_string = render_to_string('hotel/receipt_template.html', {'booking': booking})
+
+    # Create PDF response
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="receipt_{booking_id}.pdf"'
+
+    # Create PDF from HTML
+    pisa_status = pisa.CreatePDF(html_string, dest=response)
+
+    if pisa_status.err:
+        return HttpResponse('Error generating PDF.', status=500)
+
+    return response
+
+
+def booking_summary(request, booking_id):
+    booking = get_object_or_404(Booking, id=booking_id)
+
+    context = {
+        'booking': booking,
+    }
+    return render(request, 'hotel/booking_summary.html', context)
+
+
+
+
+@csrf_exempt  # Ensure proper CSRF handling in production
+def save_receipt(request):
+    if request.method == 'POST':
+        try:
+            # Load JSON data
+            data = json.loads(request.body)
+            receipt_content = data.get('receipt_content')
+            phone_number = data.get('phone_number')  # Get phone number
+            check_in_date_str = data.get('check_in_date')  # Get check-in date from request
+
+            if receipt_content and phone_number and check_in_date_str:
+                # Parse the check-in date
+                check_in_date = datetime.strptime(check_in_date_str, '%Y-%m-%dT%H:%M')  # Adjust format if necessary
+                formatted_date = check_in_date.strftime('%Y%m%d')  # Format date as YYYYMMDD
+
+                # Define the path to save the receipt using phone number and check-in date
+                filename = f'{phone_number}_{formatted_date}.pdf'  # Use phone number and formatted check-in date
+                save_path = os.path.join(settings.BASE_DIR, 'hotel', 'receipts', filename)
+
+                # Convert HTML to PDF
+                with open(save_path, 'wb') as pdf_file:
+                    pisa_status = pisa.CreatePDF(receipt_content, dest=pdf_file)
+
+                if pisa_status.err:
+                    return JsonResponse({'success': False, 'error': 'Failed to create PDF.'}, status=400)
+
+                return JsonResponse({'success': True, 'filename': filename}, status=200)
+
+            return JsonResponse({'success': False, 'error': 'No receipt content, phone number, or check-in date provided.'}, status=400)
+
+        except json.JSONDecodeError:
+            return JsonResponse({'success': False, 'error': 'Invalid JSON data.'}, status=400)
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+    return JsonResponse({'success': False}, status=400)
