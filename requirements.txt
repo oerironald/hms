@@ -24,3 +24,4 @@ psycopg2-binary
 dj-database-url
 reportlab
 WeasyPrint
+xhtml2pdf
