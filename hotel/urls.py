@@ -22,6 +22,8 @@ urlpatterns = [
     path('generate_pdf/<int:booking_id>/', views.generate_pdf, name='generate_pdf'),  # Updated to booking_id
     path('booking_summary/<int:booking_id>/', views.booking_summary, name='booking_summary'),
     path('save_receipt/', views.save_receipt, name='save_receipt'),
+    path('receipts/', views.list_receipts, name='list_receipts'),
+    path('receipts/download/<str:filename>/', views.download_receipt, name='download_receipt'),
 
     # Other paths...
 ]

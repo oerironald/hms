@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Receipt List</title>
+</head>
+<body>
+    <h1>Available Receipts</h1>
+    <ul>
+        {% for receipt in receipts %}
+            <li>
+                <a href="{% url 'hotel:download_receipt' receipt %}">{{ receipt }}</a>
+            </li>
+        {% empty %}
+            <li>No receipts available.</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
